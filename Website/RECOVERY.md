@@ -36,7 +36,7 @@ set -eu
 SALAD_STAGE=$(mktemp -d)
 python3 restore.py Website --to "$SALAD_STAGE/runtime"
 (cd Website/linux && shasum -a 256 -c SHA256SUMS)
-cp -R Website/linux "$SALAD_STAGE/linux"
+cp -RL Website/linux "$SALAD_STAGE/linux"
 ssh -F Website/linux/ssh_config salad-mumbai 'mkdir -m 700 /tmp/salad-recovery'
 scp -r -F Website/linux/ssh_config "$SALAD_STAGE/runtime" "$SALAD_STAGE/linux" salad-mumbai:/tmp/salad-recovery/
 rm -rf "$SALAD_STAGE"

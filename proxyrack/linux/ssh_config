@@ -1,0 +1,7 @@
+Host salad-mumbai
+    HostName i-0491397473a219afa
+    User ubuntu
+    IdentityFile ~/.ssh/cosmos_ed25519
+    IdentitiesOnly yes
+    ConnectTimeout 15
+    ProxyCommand sh -c 'PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/local/sessionmanagerplugin/bin aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p --region ap-south-1'

@@ -1,0 +1,36 @@
+#!/usr/bin/python3
+import argparse
+import fcntl
+import json
+import os
+from pathlib import Path
+import sys
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--read", action="store_true")
+parser.add_argument("--service", required=True, choices=("salad-bandwidth-api", "proxyrack-peer-api", "earnfm-read-session", "salad-traffmonetizer-session", "earnapp-read-session", "repocket-provider-session", "packetstream-provider-session"))
+parser.add_argument("--account", required=True)
+args = parser.parse_args()
+os.umask(0o077)
+root = Path("/run/salad-credentials")
+cache = root / "values.json"
+secret_id = "arn:aws:secretsmanager:ap-south-1:163092837436:secret:salad/mumbai/recorder-credentials-BTrNOt"
+with (root / "lock").open("a") as lock:
+    fcntl.flock(lock, fcntl.LOCK_EX)
+    if args.read and cache.exists():
+        values = json.loads(cache.read_text())
+    else:
+        import boto3
+        client = boto3.client("secretsmanager", region_name="ap-south-1")
+        values = json.loads(client.get_secret_value(SecretId=secret_id)["SecretString"])
+        if not args.read:
+            value = sys.stdin.read().rstrip("\r\n")
+            if not value:
+                raise SystemExit("Empty credential refused")
+            values[args.service] = value
+            client.put_secret_value(SecretId=secret_id, SecretString=json.dumps(values))
+        pending = cache.with_suffix(".tmp")
+        pending.write_text(json.dumps(values))
+        os.replace(pending, cache)
+    if args.read:
+        sys.stdout.write(values[args.service])

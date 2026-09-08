@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import csv
 from bisect import bisect_left, bisect_right
+from collections import deque
 from copy import deepcopy
 from datetime import datetime
 import io
@@ -17,6 +18,7 @@ import math
 import re
 import threading
 import time
+import zlib
 from pathlib import Path
 
 from dashboard.native_network import instance_run
@@ -330,6 +332,17 @@ def rate_buckets(rows, started_ms, end_ms):
     return buckets
 
 
+class LedgerRows:
+    """Replay validated records without retaining their decoded object graphs."""
+    def __init__(self, entries):
+        self.entries = entries
+
+    def __iter__(self):
+        for _, row in self.entries:
+            if row is not None:
+                yield json.loads(zlib.decompress(row))
+
+
 class FleetTestView:
     def __init__(self, root):
         self.root = Path(root)
@@ -339,7 +352,7 @@ class FleetTestView:
         self._ledgers = {}
 
     def ledger(self, path, bounded=True):
-        """Decode only new retained lines; verify the retained prefix on append."""
+        """Cache compressed lines; stream reads and verify the prefix on append."""
         stat = path.stat()
         signature = (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns)
         cache_key = (path, bounded)
@@ -362,42 +375,46 @@ class FleetTestView:
                       and (saved["entries"] or saved["offset"] == 0)
                       and saved["signature"][2] < stat.st_size <= saved["offset"] + limit
                       and digest(saved["start"], saved["offset"]) == saved["digest"])
-            entries = list(saved["entries"]) if append else []
             cutoff = max(0, stat.st_size - limit)
+            entries = deque(((at, row) for at, row in saved["entries"] if at >= cutoff) if append else (),
+                            maxlen=MAX_ROWS if bounded else None)
+            count = len(entries)
             handle.seek(saved["offset"] if append else max(0, cutoff - 1))
             if not append and cutoff and handle.read(1) != b"\n":
                 handle.readline(stat.st_size - cutoff)
             position = handle.tell()
-            data = handle.read(stat.st_size - position)
-            if len(data) != stat.st_size - position:
-                raise OSError("Ledger changed while reading")
-            lines = data.splitlines(keepends=True)
-            pending = bool(lines and not lines[-1].endswith(b"\n"))
-            for line in lines[:-1] if pending else lines:
-                entries.append((position, line))
+            new_start = position
+            pending = False
+            while position < stat.st_size:
+                line = handle.readline(stat.st_size - position)
+                if not line:
+                    raise OSError("Ledger changed while reading")
+                if not line.endswith(b"\n"):
+                    if handle.tell() != stat.st_size:
+                        raise OSError("Ledger changed while reading")
+                    pending = True
+                    break
+                entries.append((position, zlib.compress(line, 1)))
+                count += 1
                 position += len(line)
-            truncated = bounded and (stat.st_size > MAX_BYTES or len(entries) > MAX_ROWS
+            truncated = bounded and (stat.st_size > MAX_BYTES or count > MAX_ROWS
                                      or bool(append and saved["result"][2]))
-            if bounded:
-                entries = [(at, row) for at, row in entries[-MAX_ROWS:] if at >= cutoff]
-            decoded = []
-            for at, row in entries:
-                if isinstance(row, bytes):
+            entries = list(entries)
+            # Apply byte/row retention before decoding, including on cold reads.
+            for index, (at, row) in enumerate(entries):
+                if at >= new_start:
                     try:
-                        row = json.loads(row)
-                        if not isinstance(row, dict):
+                        if not isinstance(json.loads(zlib.decompress(row)), dict):
                             raise ValueError("Invalid observation")
                     except ValueError:
-                        row = None
-                decoded.append((at, row))
-            start = decoded[0][0] if decoded else position
+                        entries[index] = (at, None)
+            start = entries[0][0] if entries else position
             checksum = digest(start, position)
-        result = ([row for _, row in decoded if row is not None],
-                  sum(row is None for _, row in decoded) + pending, truncated)
+        result = (LedgerRows(entries), sum(row is None for _, row in entries) + pending, truncated)
         if cache_key not in self._ledgers and len(self._ledgers) >= 4:
             self._ledgers.pop(next(iter(self._ledgers)))
         self._ledgers[cache_key] = dict(signature=signature, start=start, offset=position, digest=checksum,
-                                       entries=decoded, result=result)
+                                       entries=entries, result=result)
         return result
 
     @staticmethod
@@ -537,21 +554,26 @@ class FleetTestView:
             source_rows, _, _ = self.ledger(source_path, bounded=False)
             for source in source_rows:
                 try:
-                    sources[source["time_ms"]] = {w["group"]: dict(w, sample_ms=timestamp_ms((w.get("sample") or {}).get("time")))
-                                                   for w in source.get("workers", [])}
+                    workers = {w["group"]: dict(w, sample_ms=timestamp_ms((w.get("sample") or {}).get("time")))
+                               for w in source.get("workers", [])}
+                    sources[source["time_ms"]] = zlib.compress(json.dumps(workers).encode(), 1)
                 except (ValueError, KeyError):
                     continue
             self._hg_sources = (source_stamp, sources)
         path = directory / "observations.jsonl"
         if path.exists():
             raw_rows, invalid, truncated = self.ledger(path)
+            source_at, source_workers = object(), {}
             for saved in raw_rows:
                 try:
                     raw = dict(saved)
                     if raw.get("experiment_id") == experiment["id"]:
                         original_hg = raw.get("hg") or {}
                         hg = raw["hg"] = dict(original_hg, workers=[dict(w) for w in original_hg.get("workers", [])])
-                        source_workers = self._hg_sources[1].get(hg.get("status_observed_ms"), {})
+                        if source_at != hg.get("status_observed_ms"):
+                            source_at = hg.get("status_observed_ms")
+                            packed = self._hg_sources[1].get(source_at)
+                            source_workers = json.loads(zlib.decompress(packed)) if packed is not None else {}
                         for worker in hg.get("workers", []):
                             original = source_workers.get(worker.get("group"), {})
                             sample = original.get("sample") or {}

@@ -98,7 +98,8 @@ def provider_read(db):
         if device is None:
             raise RuntimeError("The saved EarnApp device is absent from the signed-in account")
         safe = {"uuid": DEVICE, "observed_ms": int(time.time() * 1000), "earned_total": device["earned_total"],
-                "usage_ms": device["total_uptime"], "ips": device["ips"]}
+                "usage_ms": device["total_uptime"], "ips": device["ips"],
+                "rate": device.get("rate"), "billing": device.get("billing")}
         if any(type(safe[k]) not in (int, float) or not 0 <= safe[k] < 2**53 for k in ("earned_total", "usage_ms")):
             raise RuntimeError("Invalid EarnApp provider amount")
         with db:

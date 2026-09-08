@@ -739,7 +739,8 @@ def provider_metrics(service, data, root, read_view, now):
                     check = json.loads(check[0]) if check else {}
                     result.update(source="https://earnapp.com/dashboard/api/devices", scope="device", observed_ms=p.get("observed_ms"),
                                   earned_usd=amount(p.get("earned_total")), error=check.get("credit_error"),
-                                  raw={k: p.get(k) for k in ("uuid", "earned_total", "usage_ms")},
+                                  raw={k: p.get(k) for k in ("uuid", "earned_total", "usage_ms", "rate", "billing")},
+                                  monthly_rate_usd=amount(p.get("rate")) if p.get("billing") == "qualified_uptime" else None,
                                   window={"kind": "device_lifetime"}, accounting_interval_seconds=3600,
                                   missing="EarnApp pays for active usage time; provider credited MB is not reported.")
                 elif service == "grass":
@@ -776,33 +777,36 @@ def traffic_summary(data, hours, now, service=None, changes=()):
     peak = max(complete, key=lambda row: row[1]["mb"], default=None)
     by_minute = {t: p for t, p in complete if p.get("coverage_complete") is True
                  or p.get("coverage_complete") is None and p.get("partial") is False}
-    compared, measured, credited, estimated, partial = [], Decimal(0), Decimal(0), False, False
-    candidates = [change for change in changes if change["credited_mb"] is not None]
-    for change in candidates:
-        traffic, known, allocated, incomplete = Decimal(0), True, False, False
-        for minute in range(change["start_ms"] // 60000 * 60000, change["end_ms"], 60000):
-            point = by_minute.get(minute)
-            if point is None:
-                known = False
-                break
-            duration = min(change["end_ms"], minute + 60000) - max(change["start_ms"], minute)
-            traffic += Decimal(str(point["mb"])) * duration / 60000
-            allocated |= duration != 60000 or bool(point.get("estimated"))
-            incomplete |= bool(point.get("partial"))
-        if known:
-            measured += traffic
-            credited += Decimal(str(change["credited_mb"]))
-            compared.append(change)
-            estimated |= allocated
-            partial |= incomplete
-    comparison = {"basis": "observed provider credit changes / recorded traffic in the same observation intervals",
-                  "provider_scope": (data.get("provider_metrics") or {}).get("scope"), "traffic_scope": "recorded fleet",
-                  "measured_mb": float(measured) if compared else None, "credited_mb": float(credited) if compared else None,
-                  "ratio_percent": float(credited * 100 / measured) if compared and measured > 0 else None,
-                  "start_ms": compared[0]["start_ms"] if compared else None, "end_ms": compared[-1]["end_ms"] if compared else None,
-                  "covered_ms": sum(row["end_ms"] - row["start_ms"] for row in compared), "intervals": len(compared),
-                  "estimated": estimated, "partial": partial or len(compared) != len(changes) or not compared
-                  or any(a["end_ms"] != b["start_ms"] for a, b in zip(compared, compared[1:]))}
+    comparisons = {}
+    for field in (("credited_mb", "earned_usd") if service == "earnapp" else ("credited_mb",)):
+        compared, measured, reported, estimated, partial = [], Decimal(0), Decimal(0), False, False
+        candidates = [change for change in changes if change[field] is not None]
+        for change in candidates:
+            traffic, known, allocated, incomplete = Decimal(0), True, False, False
+            for minute in range(change["start_ms"] // 60000 * 60000, change["end_ms"], 60000):
+                point = by_minute.get(minute)
+                if point is None:
+                    known = False
+                    break
+                duration = min(change["end_ms"], minute + 60000) - max(change["start_ms"], minute)
+                traffic += Decimal(str(point["mb"])) * duration / 60000
+                allocated |= duration != 60000 or bool(point.get("estimated"))
+                incomplete |= bool(point.get("partial"))
+            if known:
+                measured += traffic
+                reported += Decimal(str(change[field]))
+                compared.append(change)
+                estimated |= allocated
+                partial |= incomplete
+        rate_key, scale = ("ratio_percent", 100) if field == "credited_mb" else ("usd_per_recorded_gb", 1000)
+        comparisons[field] = {"basis": "observed provider " + ("credit" if field == "credited_mb" else "earnings") + " changes / recorded traffic in the same observation intervals",
+                      "provider_scope": (data.get("provider_metrics") or {}).get("scope"), "traffic_scope": "recorded fleet",
+                      "measured_mb": float(measured) if compared else None, field: float(reported) if compared else None,
+                      rate_key: float(reported * scale / measured) if compared and measured > 0 else None,
+                      "start_ms": compared[0]["start_ms"] if compared else None, "end_ms": compared[-1]["end_ms"] if compared else None,
+                      "covered_ms": sum(row["end_ms"] - row["start_ms"] for row in compared), "intervals": len(compared),
+                      "estimated": estimated, "partial": partial or len(compared) != len(changes) or not compared
+                      or any(a["end_ms"] != b["start_ms"] for a, b in zip(compared, compared[1:]))}
     inventory = ((data.get("latest") or {}).get("hg") or {}) if service == "hg" else data
     total = inventory.get("desired")
     observed = inventory.get("status_observed_ms") if service == "hg" else inventory.get("inventory_ms")
@@ -833,7 +837,7 @@ def traffic_summary(data, hours, now, service=None, changes=()):
             "average_basis": "completed observed minutes", "average_minutes": len(complete),
             "average_partial": len(complete) < hours * 60 - 1 or any(p.get("partial") or p.get("coverage_complete") is False for _, p in complete),
             "peak_mb_per_minute": peak[1]["mb"] if peak else None, "peak_minute_ms": peak[0] if peak else None,
-            "provider_comparison": comparison}
+            "provider_comparison": comparisons["credited_mb"], "earnings_comparison": comparisons.get("earned_usd")}
 
 
 def make_handler(store: Store, status_provider: Callable[[], Dict[str, Any]], static_dir: Path, ps_view=None, expected_reporters: int = 10, fleet_view=None, minute_view=None, *, trusted_uid):

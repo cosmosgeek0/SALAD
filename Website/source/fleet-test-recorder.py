@@ -160,7 +160,7 @@ def record_costs(stop, once=False):
                     coverage_start = saved[1] if saved and saved[0] is not None and saved[0] >= first and saved[1] is not None else first
                     query = 'resource.type = "instance_controller" and resource.labels.project_name = "default" and ('
                     query += ' or '.join('resource.labels.container_group_name = ' + json.dumps(name) for name in targets)
-                    query += ') and (json_log.message = "Instance Running" or json_log.message startswith "Instance Reallocated" or json_log.message startswith "Instance Interrupted" or json_log.message = "Instance Stopped" or json_log.message = "Instance Starting" or json_log.message = "Instance Downloading" or json_log.message = "Instance Allocated")'
+                    query += ') and (json_log.message = "Instance Running" or json_log.message startswith "Instance Reallocated" or json_log.message startswith "Instance Interrupted" or json_log.message startswith "Instance Exited" or json_log.message = "Instance Stopped" or json_log.message = "Instance Starting" or json_log.message = "Instance Downloading" or json_log.message = "Instance Allocated")'
                     client = SaladLogClient(organization, 'default', '', lambda: key, timeout=20, log_query=query)
                     until = min(now, cursor + 2 * 3600000)
                     windows = [(max(first, cursor - 180000), until)]

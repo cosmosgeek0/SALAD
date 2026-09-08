@@ -12,6 +12,7 @@ import math
 import os
 from pathlib import Path
 import re
+import secrets
 import subprocess
 import threading
 import time
@@ -104,6 +105,31 @@ def command():
     if len(args) > 100 or any(not value or len(value) > 1000 for value in args):
         raise ValueError("Worker command exceeds the verified Salad command envelope")
     return args
+
+
+def initialize():
+    api = salad_api()
+    existing = next((g for g in api(GROUPS).get("items", []) if g["name"] == "pr"), None)
+    group = api(GROUPS + "/pr") if existing else None
+    namespace = group["container"].get("environment_variables", {}).get("PR_NAMESPACE") if group else None
+    if group and (group["container"]["image"] != IMAGE or group["replicas"] != 10 or not namespace):
+        raise RuntimeError("Existing PR has a different image, replica count or namespace")
+    path = DATA / "deployment.json"
+    if path.exists():
+        config = configuration()
+        if config.get("name") != "pr" or config.get("replicas") != 10:
+            raise RuntimeError("Existing metadata is not this PR deployment")
+        if config.get("group_id") != (group["id"] if group else None) or group and config.get("namespace") != namespace:
+            raise RuntimeError("Local and cloud identity differ; preserve this data and use a separate PR_DATA_DIR")
+        print("Existing PR deployment metadata retained:", path)
+        return
+    config = {"organization": "ssh1", "project": "default", "name": "pr", "replicas": 10,
+              "image": IMAGE, "namespace": namespace or secrets.token_hex(16),
+              "created_at": group["create_time"] if group else datetime.now(timezone.utc).isoformat()}
+    if group:
+        config["group_id"] = group["id"]
+    save(path, config)
+    print("Existing PR identity adopted:" if group else "New PR metadata initialized:", path)
 
 
 def deploy():
@@ -724,10 +750,12 @@ def main():
     os.umask(0o077)
     DATA.mkdir(parents=True, exist_ok=True, mode=0o700)
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["deploy", "status", "observe", "update"])
+    parser.add_argument("action", choices=["init", "deploy", "status", "observe", "update"])
     parser.add_argument("--once", action="store_true", help="Record one Salad cycle without starting the provider account reader")
     args = parser.parse_args()
-    if args.action == "deploy":
+    if args.action == "init":
+        initialize()
+    elif args.action == "deploy":
         deploy()
     elif args.action == "status":
         inspect()

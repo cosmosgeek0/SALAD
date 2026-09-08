@@ -23,6 +23,8 @@ You do not need an old chat to find or manage these pieces.
 3. From the repository root, connect with `ssh -F Website/linux/ssh_config salad-mumbai`. [CONNECTIONS.md](CONNECTIONS.md#connect-from-a-mac) explains prerequisites and replacement-machine access.
 4. Identify the affected service in [OPERATIONS.md](OPERATIONS.md#services). Read its source and data contract before changing it. Its protocol README owns cloud-client deployment and recovery behavior.
 
+Proxyrack's program, worker and service definition are owned by [the Proxyrack folder](../proxyrack/README.md); the matching Website paths are links. Keep that folder with this repository checkout. The source restore below materializes regular files, and the Linux staging command in RECOVERY.md resolves the service link before transfer.
+
 For an offline source restore, run from the repository root:
 
 ```sh

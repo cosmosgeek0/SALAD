@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Salad · Overview</title><link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg?v=2e226a06b89feb65f678cb0aa2da370bd969b39c0e5333307b40fc2a4e50c9f0"><link rel="stylesheet" href="/styles.css">
+<style>
+#overview{--hg:var(--blue);--ps:var(--earned);--pr:#9098a5;--rp:#9b80d5;--ef:#bd9060;--tm:#d1ab4f;--pa:#cb80ac;--ea:#52aabc;--gr:#8caa67}
+.ov-metrics-scroll{overflow:auto}#overviewMetrics{grid-template-columns:repeat(8,minmax(160px,1fr))}#overviewMetrics .metric{border:0;border-right:1px solid var(--line)}#overviewMetrics .metric:last-child{border-right:0}
+.ov-plot{display:block;width:100%;height:380px}.ov-lower{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ov-protocol{display:inline-flex;align-items:center;gap:8px;color:var(--text);text-decoration:none;white-space:nowrap}.ov-protocol:hover{color:var(--blue)}.ov-protocol .node-square,.ov-share-track i{background:var(--protocol)}
+.ov-protocol-table{min-width:1080px}.ov-protocol-table td,.ov-protocol-table th{text-align:left;white-space:nowrap}.ov-table-share{display:inline-flex;align-items:center;gap:8px}.ov-table-share>span:first-child{width:44px;text-align:left}.ov-share-track{width:54px;height:5px;background:var(--surface-muted)}.ov-share-track i{display:block;height:100%}.ov-table-sum{border-top:1px solid var(--line)}
+#earningsTooltip{display:grid;grid-template-columns:minmax(max-content,1.5fr) repeat(2,minmax(max-content,1fr));column-gap:16px;width:380px;max-width:calc(100vw - 24px);z-index:30}
+#earningsTooltip .popup-heading{grid-column:1/-1;display:block;font:inherit;contain:inline-size;white-space:normal}
+#earningsTooltip .popup-row{grid-column:1/-1;grid-template-columns:subgrid;column-gap:inherit;min-height:20px}
+#earningsTooltip .popup-label{white-space:nowrap}
+#earningsTooltip .popup-meta,#earningsTooltip .popup-value{font-size:inherit;text-align:left}
+#earningsTooltip .popup-total{border-top:1px solid var(--line);margin-top:6px;padding-top:6px}
+@media(max-width:768px){.ov-lower{grid-template-columns:minmax(0,1fr)}.ov-plot{height:240px}}
+</style></head><body class="sidebar-collapsed">
+  <aside id="sidebar" class="sidebar" data-state="collapsed">
+    <div class="side-top"><button id="sidebarExpand" class="brand" aria-label="Expand sidebar"><svg class="brand-mark" viewBox="0 0 44 52" aria-hidden="true"><use href="/salad-logo.svg#mark"/></svg><svg class="brand-word" viewBox="54 21 54 19" role="img" aria-label="Salad"><use href="/salad-logo.svg#word"/></svg></button><button id="sidebarCollapse" class="side-collapse btn btn-sm" aria-label="Collapse sidebar">‹</button></div>
+    <a class="overview-link active" aria-current="page" href="/overview" aria-label="Overview" title="Overview"><span class="service-mark" aria-hidden="true">◫</span><span class="service-name">Overview</span></a>
+    <nav class="overview-services" aria-label="Services"><a class="service-link" href="/honeygain" aria-label="Honeygain" title="Honeygain"><span class="service-mark">HG</span><span class="service-name">Honeygain</span></a><a class="service-link" href="/packetstream" aria-label="PacketStream" title="PacketStream"><span class="service-mark">PS</span><span class="service-name">PacketStream</span></a><a class="service-link" href="/proxyrack" aria-label="Proxyrack" title="Proxyrack"><span class="service-mark">PR</span><span class="service-name">Proxyrack</span></a><a class="service-link" href="/repocket" aria-label="Repocket" title="Repocket"><span class="service-mark">RP</span><span class="service-name">Repocket</span></a><a class="service-link" href="/earnfm" aria-label="EarnFM" title="EarnFM"><span class="service-mark">EF</span><span class="service-name">EarnFM</span></a><a class="service-link" href="/traffmonetizer" aria-label="Traffic Monetizer" title="Traffic Monetizer"><span class="service-mark">TM</span><span class="service-name">Traffic Monetizer</span></a><a class="service-link" href="/pawns-app" aria-label="Pawns.app" title="Pawns.app"><span class="service-mark">PA</span><span class="service-name">Pawns.app</span></a><a class="service-link" href="/earnapp" aria-label="EarnApp" title="EarnApp"><span class="service-mark">EA</span><span class="service-name">EarnApp</span></a><a class="service-link" href="/grass" aria-label="Grass" title="Grass"><span class="service-mark">GR</span><span class="service-name">Grass</span></a></nav>
+    <button id="themeToggle" class="theme-toggle btn btn-outline-secondary btn-sm" aria-label="Switch to dark mode">Dark mode</button>
+  </aside>
+  <button id="sidebarScrim" class="sidebar-scrim" aria-label="Close sidebar" hidden></button>
+<div class="workspace"><main id="overview">
+  <div class="page-head"><h1>Overview</h1><div class="page-actions"><span id="connection" role="status">Loading…</span><button id="overviewRefresh" class="quiet-button btn btn-outline-secondary btn-sm" aria-label="Refresh overview" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11a9 9 0 0 1 15-6l3 3M21 3v5h-5M21 13a9 9 0 0 1-15 6l-3-3M3 21v-5h5"/></svg></button></div></div>
+  <div class="ov-metrics-scroll"><div id="overviewMetrics" class="metrics overview-metrics" aria-label="Overview measurements"></div></div>
+  <section class="panel chart-panel corners" aria-labelledby="earningsTitle">
+    <div class="panel-head"><h2 id="earningsTitle">Earnings</h2><span class="panel-subtitle">USD</span><div class="chart-controls"><details id="hours" class="range-control"><summary id="hoursLabel" aria-haspopup="listbox" aria-controls="hoursOptions"><span>30d</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></summary><div id="hoursOptions" role="listbox" aria-label="Overview period"><button type="button" role="option" data-period="1" aria-selected="false">1 hour</button><button type="button" role="option" data-period="12" aria-selected="false" title="Latest 12 hours">Today</button><button type="button" role="option" data-period="168" aria-selected="false">7 days</button><button type="button" role="option" data-period="720" aria-selected="true">30 days</button></div></details></div></div>
+    <div class="traffic-layout"><div class="ps-chart"><div class="ps-chart-scroll"><svg id="earningsChart" class="ov-plot" role="img" tabindex="0" aria-label="Earnings by protocol"></svg></div><div id="earningsTooltip" class="ps-popup hidden" role="tooltip"></div></div></div>
+  </section>
+  <div class="ov-lower">
+    <section class="panel corners" aria-labelledby="cumulativeTitle"><div class="panel-head"><h2 id="cumulativeTitle">Earnings &amp; cost</h2><span class="panel-subtitle">USD</span><div class="chart-controls"><div class="chart-legend"><span><i class="legend-key earned"></i>Earned / equivalent</span><span title="Calendar-period cost timeline is not reported; selected-hour runtime and cost are available in each service’s Details"><i class="legend-key" style="background:var(--amber)"></i>Cost —</span></div></div></div><div class="traffic-layout"><div class="ps-chart"><svg id="cumulativeChart" class="ov-plot" role="img" aria-label="Cumulative earnings and cost"></svg></div></div></section>
+    <section class="panel corners" aria-labelledby="trafficTitle"><div class="panel-head"><h2 id="trafficTitle">Traffic</h2><span class="panel-subtitle">MB</span><div class="chart-controls"><div class="chart-legend"><span><i class="legend-key"></i>Network</span><span><i class="legend-key earned"></i>Credited</span></div></div></div><div class="traffic-layout"><div class="ps-chart"><svg id="overviewTraffic" class="ov-plot" role="img" aria-label="Combined measured and credited traffic"></svg></div></div></section>
+  </div>
+  <section class="panel corners" aria-labelledby="protocolTitle"><div class="panel-head"><h2 id="protocolTitle">Protocol breakdown</h2></div><div class="table-scroll"><table class="ov-protocol-table table table-sm table-hover"><thead><tr><th>Protocol</th><th>Earned / equivalent USD</th><th>Share</th><th>Measured MB</th><th>Credited MB</th><th>Credit / measured %</th><th>Average MB/min</th><th>Peak MB/min</th><th>Running / total</th></tr></thead><tbody id="protocolRows"></tbody></table></div></section>
+</main></div><script src="/ps1.js"></script>
+<script>
+(() => {
+  'use strict';
+  const services=[
+    {id:'hg',name:'Honeygain',path:'/honeygain',url:'/api/fleet-test?service=hg'},
+    {id:'ps',name:'PacketStream',path:'/packetstream',url:'/api/ps1/minutes'},
+    {id:'proxyrack',name:'Proxyrack',path:'/proxyrack',color:'pr',url:'/api/proxyrack'},
+    {id:'rp',name:'Repocket',path:'/repocket',url:'/api/repocket?chart=1'},
+    {id:'earnfm',name:'EarnFM',path:'/earnfm',color:'ef',url:'/api/earnfm'},
+    {id:'tm',name:'Traffic Monetizer',path:'/traffmonetizer',url:'/api/traffmonetizer?chart=1'},
+    {id:'pawns',name:'Pawns.app',path:'/pawns-app',color:'pa',url:'/api/pawns'},
+    {id:'earnapp',name:'EarnApp',path:'/earnapp',color:'ea',url:'/api/earnapp'},
+    {id:'grass',name:'Grass',path:'/grass',color:'gr',url:'/api/grass'}
+  ];
+  const el=id=>document.getElementById(id),finite=value=>typeof value==='number'&&Number.isFinite(value);
+  const make=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
+  const svg=(tag,attrs={},text)=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,String(v));if(text!=null)n.textContent=text;return n;};
+  const sum=values=>{const known=values.filter(finite);return known.length?known.reduce((a,b)=>a+b,0):null;};
+  const number=window.formatBandwidth,feeds=window.bandwidthData;
+  const money=value=>finite(value)?'$'+number(value,6):'—';
+  const date=time=>finite(time)?new Date(time).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}):'Unknown';
+  const day=time=>new Date(time).toLocaleDateString([],{month:'short',day:'numeric'});
+  const clock=time=>new Date(time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false});
+  const color=service=>'var(--'+(service.color||service.id)+')';
+  let period=720,records=new Map(),view=null,geometry=null,selected=-1,busy=false,paint=null;
+  const renderSoon=()=>{if(paint===null)paint=requestAnimationFrame(()=>{paint=null;render();});};
+  function calendar(now=Date.now()){
+    const end=(Math.floor(now/60000)+1)*60000,start=end-period*3600000;
+    const bounds=Array.from({length:61},(_,i)=>start+i*(end-start)/60);
+    return {now,start,end,bounds};
+  }
+  function aggregate(){
+    const window=calendar(),minutes=new Map(),buckets=window.bounds.slice(0,-1).map((start,i)=>({start,end:window.bounds[i+1],earned:services.map(()=>null),credited:services.map(()=>null),measured:services.map(()=>null),posts:[]}));
+    const bucketAt=time=>buckets.find(b=>time>=b.start&&time<b.end);
+    const rows=services.map((service,index)=>{
+      const record=records.get(service.id),provider=record?.provider_metrics||{},observed=provider.observed_period||{},traffic=record?.traffic_summary||{};
+      const posts=(provider.intervals||[]).filter(p=>finite(p.start_ms)&&finite(p.end_ms)&&p.end_ms>p.start_ms&&p.end_ms>=window.start&&p.end_ms<=window.now);
+      const points=(record?.minutes||[]).filter(m=>finite(m.minute_ms)&&m.minute_ms>=window.start&&m.minute_ms<window.now&&finite(m.mb));
+      for(const post of posts){const bucket=bucketAt(post.end_ms);if(!bucket)continue;
+        if(finite(observed.earned_usd)&&finite(post.earned_usd)){bucket.earned[index]=(bucket.earned[index]??0)+post.earned_usd;bucket.posts.push({...post,index});}
+        if(finite(observed.credited_mb)&&finite(post.credited_mb))bucket.credited[index]=(bucket.credited[index]??0)+post.credited_mb;
+      }
+      for(const point of points){const bucket=bucketAt(point.minute_ms);if(bucket)bucket.measured[index]=(bucket.measured[index]??0)+point.mb;
+        if(finite(traffic.end_ms)&&point.minute_ms+60000<=Math.min(window.now,traffic.end_ms-60000))minutes.set(point.minute_ms,(minutes.get(point.minute_ms)||0)+point.mb);
+      }
+      const completed=points.filter(m=>finite(traffic.end_ms)&&m.minute_ms+60000<=Math.min(window.now,traffic.end_ms-60000)),comparison=traffic.provider_comparison;
+      const matched=comparison&&finite(comparison.start_ms)&&comparison.start_ms>=window.start&&comparison.end_ms<=window.now?comparison:null;
+      const pairs=posts.filter(p=>finite(p.earned_usd)&&finite(p.credited_mb));
+      return {service,record,provider,observed,traffic,pairs,comparison:matched,earned:finite(observed.earned_usd)?sum(posts.map(p=>p.earned_usd)):null,credited:finite(observed.credited_mb)?sum(posts.map(p=>p.credited_mb)):null,measured:sum(points.map(m=>m.mb)),average:completed.length?sum(completed.map(m=>m.mb))/completed.length:null,peak:completed.length?Math.max(...completed.map(m=>m.mb)):null};
+    });
+    for(const b of buckets){b.total=sum(b.earned);b.credit=sum(b.credited);b.network=sum(b.measured);}
+    const comparisons=rows.map(r=>r.comparison).filter(c=>c&&finite(c.credited_mb)&&finite(c.measured_mb));
+    const comparedCredit=sum(comparisons.map(c=>c.credited_mb)),comparedNetwork=sum(comparisons.map(c=>c.measured_mb)),pairs=rows.flatMap(r=>r.pairs),paidMB=sum(pairs.map(p=>p.credited_mb)),paidUSD=sum(pairs.map(p=>p.earned_usd)),completed=[...minutes.values()];
+    return {...window,rows,buckets,earned:sum(rows.map(r=>r.earned)),credited:sum(rows.map(r=>r.credited)),measured:sum(rows.map(r=>r.measured)),average:completed.length?sum(completed)/completed.length:null,peak:completed.length?Math.max(...completed):null,ratio:comparedNetwork>0?comparedCredit/comparedNetwork*100:null,effective:paidMB>0?paidUSD/(paidMB/1000):null};
+  }
+  function sourceTitle(row){
+    const p=row.provider,w=row.observed.earned_window,c=row.observed.credited_window;
+    const span=window=>window&&finite(window.start_ms)&&finite(window.end_ms)?date(window.start_ms)+' – '+date(window.end_ms):'—';
+    return [p.scope||'Unknown scope',(p.usd_conversion?'USD equivalent: ':'Earnings: ')+span(w),'Credit: '+span(c),'Observed: '+date(p.observed_ms),p.error,p.missing,p.changes_error,p.usd_conversion?.basis,p.usd_conversion?.source].filter(Boolean).join('\n');
+  }
+  function metric(label,value,unit='',detail=''){
+    if(value==='—'||value==='≈ —'){value='Not reported';unit='';}
+    const card=make('div',null,'metric card'),amount=make('div',value,'metric-value');card.title=detail;
+    if(unit)amount.append(make('span',unit,'metric-unit'));card.append(make('p',label,'metric-label'),amount);return card;
+  }
+  function protocolLink(service){const link=make('a',null,'ov-protocol');link.href=service.path;link.style.setProperty('--protocol',color(service));link.append(make('i',null,'node-square'),make('span',service.name));return link;}
+  function inventoryCounts(now=Date.now()){
+    const rows={};
+    for(const service of services){
+      const record=records.get(service.id),t=record?.traffic_summary||{},fresh=!record?.error&&finite(t.inventory_ms)&&now-t.inventory_ms>=0&&now-t.inventory_ms<=(service.id==='hg'||service.id==='ps'?120000:90000);
+      rows[service.id]={running:fresh?t.containers_running:null,total:t.containers_total};
+    }
+    const values=Object.values(rows);
+    return {rows,running:sum(values.map(row=>row.running)),total:values.every(row=>finite(row.total))?sum(values.map(row=>row.total)):null,partial:values.some(row=>!finite(row.running))};
+  }
+  const countText=count=>(finite(count.running)?number(count.running,0)+(count.partial?'+':''):finite(count.total)?'Stale':'Loading…')+(finite(count.total)?' / '+number(count.total,0):'');
+  function render(){
+    view=aggregate();const rows=view.rows,totals=rows.map(r=>r.traffic),now=Date.now();
+    const counts=inventoryCounts(now),dayTraffic=sum(totals.map(t=>t.last_24h_mb));
+    const earningSources=rows.filter(r=>finite(r.earned)).length,earningDetail='USD · '+earningSources+'/'+services.length+' protocols · partial';
+    const networkDetail='Decimal MB; available native chart intervals within the selected period, limited to the last 24 hours. Earlier native chart coverage is unavailable; partial coverage'+(totals.some(t=>t.estimated)?'; estimated interval allocation':'');
+    const partial=(value,digits=1)=>finite(value)?'≈ '+number(value,digits):'—';
+    el('overviewMetrics').replaceChildren(
+      metric('Containers'+(counts.partial?' · partial':''),countText(counts),'',counts.partial?'Confirmed running count; + means other inventories are still unverified.':'Running / reported configuration'),
+      metric('Peak rate',partial(view.peak),'MB/min','Peak combined completed minute; partial coverage'),
+      metric('Measured · 24h',partial(dayTraffic),'MB','Recorded last-day chart intervals'),
+      metric('Average rate',partial(view.average),'MB/min','Completed observed minutes; partial coverage'),
+      metric('Credited',partial(view.credited),'MB','Observed provider credit changes; separate source windows; partial coverage'),
+      metric('Earned / equivalent',partial(view.earned,3),'USD',earningDetail+' · Provider earnings and published USD equivalents'),
+      metric('Credit / measured %',partial(view.ratio),'','Matched provider and network comparison operands; partial / estimated'),
+      metric('Effective rate',number(view.effective,4),'USD/GB','Earnings / credited GB in matching observation intervals')
+    );
+    updateClock();
+    const body=el('protocolRows');body.replaceChildren();
+    for(const row of [...rows].sort((a,b)=>(b.earned??-1)-(a.earned??-1))){
+      const share=finite(row.earned)&&view.earned>0?row.earned/view.earned*100:null;
+      const tr=make('tr'),name=make('td'),fraction=make('td'),shareValue=make('span',null,'ov-table-share'),track=make('span',null,'ov-share-track'),fill=make('i');tr.dataset.service=row.service.id;tr.title=sourceTitle(row);tr.style.setProperty('--protocol',color(row.service));name.append(protocolLink(row.service));fill.style.width=(share??0)+'%';track.append(fill);shareValue.append(make('span',finite(share)?number(share,1)+'%':'—'),track);fraction.append(shareValue);
+      const t=row.traffic,count=counts.rows[row.service.id];
+      const cell=(value,detail)=>{const td=make('td',value==='—'?'Not reported':value);td.title=detail||sourceTitle(row);return td;};
+      tr.append(name,cell(number(row.earned,6)),fraction,cell(number(row.measured,1),networkDetail),cell(number(row.credited,1)),cell(finite(row.comparison?.ratio_percent)?number(row.comparison.ratio_percent,1)+'%':'—',row.comparison?JSON.stringify(row.comparison):'No matched comparison inside this period'),cell(number(row.average,2),networkDetail),cell(number(row.peak,2),networkDetail),cell(countText(count),'Inventory '+date(t.inventory_ms)));body.append(tr);
+    }
+    const row=make('tr',null,'ov-table-sum');for(const value of ['Total',number(view.earned,6),view.earned>0?'100%':'—',number(view.measured,1),number(view.credited,1),finite(view.ratio)?number(view.ratio,1)+'%':'—',number(view.average,2),number(view.peak,2),countText(counts)])row.append(make('td',value));body.append(row);draw();
+  }
+  function axes(target,maximum,currency=true){
+    const width=target.clientWidth||600,height=target.clientHeight,left=width<450?46:70,right=width-16,top=16,bottom=height-26;
+    const desired=(maximum>0?maximum:1)*1.04,raw=desired/5,power=10**Math.floor(Math.log10(raw)),step=[1,2,2.5,5,10].map(n=>n*power).find(n=>n>=raw),ceiling=Math.ceil(desired/step)*step;
+    const x=time=>left+(time-view.start)/(view.end-view.start)*(right-left),y=value=>top+(1-value/ceiling)*(bottom-top);target.replaceChildren();target.setAttribute('viewBox','0 0 '+width+' '+height);
+    for(let value=0;value<=ceiling+step/2;value+=step)target.append(svg('line',{x1:left,x2:right,y1:y(value),y2:y(value),stroke:'var(--plot-grid)','stroke-dasharray':'2 4'}),svg('text',{x:left-6,y:y(value)+3,'text-anchor':'end'},(currency?'$':'')+number(value,2)));
+    const count=Math.max(3,Math.min(12,Math.floor(width/160))),indices=[...new Set(Array.from({length:count},(_,i)=>Math.round(i*(view.buckets.length-1)/(count-1))))];
+    for(const [j,i] of indices.entries()){const b=view.buckets[i];target.append(svg('text',{x:x((b.start+b.end)/2),y:height-12,'text-anchor':j===0?'start':j===indices.length-1?'end':'middle'},period<=12?clock(b.start):day(b.start)));}
+    target.append(svg('line',{x1:left,x2:right,y1:bottom,y2:bottom,stroke:'var(--axis-line)'}),svg('line',{x1:left,x2:left,y1:top,y2:bottom,stroke:'var(--axis-line)'}));return {x,y,left,right,top,bottom,width,height};
+  }
+  function draw(){
+    if(!view)return;const target=el('earningsChart'),g=axes(target,Math.max(0,...view.buckets.map(b=>b.total||0)));geometry=g;
+    for(const b of view.buckets){const span=g.x(b.end)-g.x(b.start),width=span*.9,x=g.x(b.start)+(span-width)/2;let total=0;
+      if(b.total===null){target.append(svg('line',{x1:x,x2:x+width,y1:g.bottom-1,y2:g.bottom-1,stroke:'var(--axis-line)','stroke-dasharray':'1 4'}));continue;}
+      for(const [i,value] of b.earned.entries()){if(!finite(value)||value<=0)continue;target.append(svg('rect',{x,y:g.y(total+value),width,height:g.y(total)-g.y(total+value),fill:color(services[i])}));total+=value;}
+      if(total===0)target.append(svg('line',{x1:x,x2:x+width,y1:g.bottom-1,y2:g.bottom-1,stroke:'var(--ps)','stroke-width':2}));
+    }
+    if(!view.buckets.some(b=>finite(b.total)))target.append(svg('text',{x:(g.left+g.right)/2,y:(g.top+g.bottom)/2,'text-anchor':'middle'},busy?'Loading…':'—'));
+    target.append(svg('rect',{id:'earningsSelection',y:g.top,height:g.bottom-g.top,fill:'var(--chart-hover)',visibility:'hidden','pointer-events':'none'}));
+    target.setAttribute('aria-label','Past '+period+'h; 60 bars of '+period+' min. Observed earnings / USD equivalents '+money(view.earned)+'. Partial coverage. Missing bars are unavailable. Arrow keys inspect.');
+    const cumulative=el('cumulativeChart'),c=axes(cumulative,view.earned||0),posts=view.buckets.flatMap(b=>b.posts).sort((a,b)=>a.end_ms-b.end_ms);
+    if(posts.length){let amount=0;const first=Math.max(view.start,posts.reduce((n,p)=>Math.min(n,p.start_ms),Infinity));let d='M '+c.x(first)+' '+c.y(0);
+      for(const p of posts){amount+=p.earned_usd;d+=' H '+c.x(p.end_ms)+' V '+c.y(amount);}
+      cumulative.append(svg('path',{d:d+' V '+c.bottom+' H '+c.x(first)+' Z',fill:'var(--earned)',opacity:.065}),svg('path',{d,fill:'none',stroke:'var(--earned)','stroke-width':2,'stroke-linejoin':'round'}));
+    }
+    cumulative.setAttribute('aria-label','Cumulative observed earnings / USD equivalents '+money(view.earned)+'. Partial coverage. Calendar-period cost timeline is not reported.');
+    const traffic=el('overviewTraffic'),t=axes(traffic,Math.max(0,...view.buckets.flatMap(b=>[b.network||0,b.credit||0])),false);
+    for(const [field,stroke] of [['network','var(--hg)'],['credit','var(--ps)']]){let path='';for(const b of view.buckets){if(!finite(b[field])){path+=' ';continue;}const x=t.x((b.start+b.end)/2),y=t.y(b[field]);path+=(path.endsWith(' ')||!path?'M ':' L ')+x+' '+y;traffic.append(svg('circle',{cx:x,cy:y,r:2,fill:stroke}));}traffic.append(svg('path',{d:path.trim(),fill:'none',stroke,'stroke-width':2,'stroke-linejoin':'round'}));}
+    traffic.setAttribute('aria-label','Measured '+number(view.measured)+' MB; credited '+number(view.credited)+' MB. Separate volumes, partial coverage.');if(selected>=0)inspect(selected,undefined,true);
+  }
+  function inspect(index,event,preservePosition=false){
+    if(!view||!geometry||!view.buckets[index])return;const changed=selected!==index,b=view.buckets[index],g=geometry,tooltip=el('earningsTooltip'),marker=el('earningsSelection'),wrap=tooltip.parentElement.getBoundingClientRect(),width=parseFloat(getComputedStyle(tooltip).width);
+    if(!preservePosition){const cursor=event?event.clientX-wrap.left:wrap.width-width-16,side=cursor+width+16<=innerWidth-wrap.left-12?cursor+16:cursor-width-16,top=Math.max(g.top+8,12-wrap.top);tooltip.style.left=side+'px';tooltip.style.top=top+'px';tooltip.style.maxHeight=Math.min(innerHeight*.65,innerHeight-wrap.top-top-12)+'px';}
+    tooltip.style.left=Math.max(12-wrap.left,Math.min(parseFloat(tooltip.style.left)||0,innerWidth-wrap.left-width-12))+'px';
+    selected=index;marker.setAttribute('x',g.x(b.start));marker.setAttribute('width',g.x(b.end)-g.x(b.start));marker.setAttribute('visibility','visible');
+    if(!changed&&!preservePosition)return;
+    const d=new Date(b.start),iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),heading=make('div',null,'popup-heading');heading.append(make('span',iso+' · '+clock(b.start)+'–'+clock(b.end)+(d.toDateString()!==new Date(b.end).toDateString()?' +1d':'')),make('span',' · PARTIAL'));tooltip.replaceChildren(heading);
+    for(const [i,service] of services.entries()){const row=make('div',null,'popup-row'),identity=make('span',null,'popup-label'),square=make('i',null,'popup-square');square.style.background=color(service);identity.append(square,make('span',service.name));row.append(identity,make('span',finite(b.credited[i])?number(b.credited[i])+' MB':'—','popup-meta'),make('span',money(b.earned[i]),'popup-value'));row.title=sourceTitle(view.rows[i]);tooltip.append(row);}
+    const total=make('div',null,'popup-row popup-total');total.append(make('span','TOTAL'),make('span',finite(b.credit)?number(b.credit)+' MB':'—','popup-meta'),make('span',money(b.total),'popup-value'));tooltip.append(total);tooltip.classList.remove('hidden');
+  }
+  function hide(){selected=-1;el('earningsTooltip').classList.add('hidden');el('earningsSelection')?.setAttribute('visibility','hidden');}
+  function updateClock(){
+    const now=Date.now(),read=services.filter(service=>records.get(service.id)?.provider_metrics||records.get(service.id)?.traffic_summary),sources=read.map(service=>records.get(service.id).provider_metrics?.observed_ms).filter(finite),updates=read.map(service=>feeds.updated(service,720)).filter(finite);
+    const current=read.length===services.length&&read.every(service=>!records.get(service.id).error&&feeds.providerFresh(service.id,records.get(service.id).provider_metrics,now));
+    const text=(current?'':'Stale · ')+'Updated '+feeds.age(updates.length?Math.max(...updates):null,now)+' · Source '+feeds.age(sources.length?Math.min(...sources):null,now),node=el('connection');
+    if(node.textContent!==text)node.textContent=text;
+    node.className=current?'ok':'bad';node.title=read.length+'/'+services.length+' feeds. Updated: most recent successful fetch; Source: oldest provider observation. Missing or failed feeds remain unverified.';
+    if(view){
+      const counts=inventoryCounts(now),card=el('overviewMetrics').firstElementChild,amount=card.querySelector('.metric-value'),text=countText(counts),detail=counts.partial?'Confirmed running count; + means other inventories are still unverified.':'Running / reported configuration';
+      if(amount.textContent!==text)amount.textContent=text;
+      if(card.title!==detail)card.title=detail;
+      const label='Containers'+(counts.partial?' · partial':'');if(card.firstElementChild.textContent!==label)card.firstElementChild.textContent=label;
+      for(const row of el('protocolRows').rows){
+        const count=row.dataset.service?counts.rows[row.dataset.service]:counts,cell=row.lastElementChild,text=countText(count);
+        if(cell.textContent!==text)cell.textContent=text;
+      }
+    }
+  }
+  function setRecord(service,d,error){
+    const points=d.hg_minutes||d.candles||d.chart_minutes||d.minutes||d.points||[];
+    records.set(service.id,{error,provider_metrics:d.provider_metrics,traffic_summary:d.traffic_summary,minutes:points.map(m=>({minute_ms:m.minute_ms??m.time_ms,mb:m.mb,partial:m.partial,estimated:m.estimated}))});renderSoon();
+  }
+  async function refresh(){
+    if(busy)return;busy=true;el('overviewRefresh').disabled=true;
+    await Promise.allSettled(services.map(async service=>{
+      try{setRecord(service,await feeds.load(service,720));}
+      catch(error){records.set(service.id,{...records.get(service.id),error:error.message});renderSoon();}
+    }));busy=false;el('overviewRefresh').disabled=false;updateClock();
+  }
+  function selectPeriod(value){period=value;el('hoursLabel').firstElementChild.textContent=period===1?'1h':period===12?'Today':period/24+'d';el('hours').open=false;for(const option of el('hoursOptions').children)option.setAttribute('aria-selected',String(Number(option.dataset.period)===period));el('hoursLabel').focus({preventScroll:true});hide();render();}
+  for(const option of el('hoursOptions').children)option.onclick=()=>selectPeriod(Number(option.dataset.period));
+  el('hours').onkeydown=event=>{const options=[...el('hoursOptions').children],index=options.indexOf(document.activeElement);if(event.key==='Escape'){event.preventDefault();el('hours').open=false;el('hoursLabel').focus();}else if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();el('hours').open=true;const next=event.key==='Home'?0:event.key==='End'?options.length-1:index<0?options.findIndex(o=>Number(o.dataset.period)===period):(index+(event.key==='ArrowDown'?1:options.length-1))%options.length;options[next].focus();}};
+  document.addEventListener('pointerdown',event=>{if(!el('hours').contains(event.target))el('hours').open=false;});
+  const chart=el('earningsChart'),indexAt=event=>{if(!view||!geometry)return -1;const x=event.clientX-chart.getBoundingClientRect().left;return view.buckets.findIndex(b=>x>=geometry.x(b.start)&&x<geometry.x(b.end));};
+  chart.onpointermove=event=>{const i=indexAt(event);if(i<0)hide();else inspect(i,event);};chart.onpointerleave=hide;chart.onblur=hide;
+  chart.onclick=event=>{const i=indexAt(event);if(i>=0)inspect(i,event);};
+  chart.onkeydown=event=>{if(!view||!['ArrowLeft','ArrowRight','Home','End','Escape'].includes(event.key))return;event.preventDefault();if(event.key==='Escape'){hide();return;}inspect(event.key==='Home'?0:event.key==='End'?view.buckets.length-1:Math.max(0,Math.min(view.buckets.length-1,(selected<0?view.buckets.length-1:selected)+(event.key==='ArrowLeft'?-1:1))));};
+  el('overviewRefresh').onclick=refresh;const resize=new ResizeObserver(draw);resize.observe(chart);resize.observe(el('overviewTraffic'));document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
+  el('overviewMetrics').replaceChildren(...['Containers','Peak rate','Measured · 24h','Average rate','Credited','Earned / equivalent','Credit / measured %','Effective rate'].map(label=>metric(label,'\u00a0')));
+  for(const service of services)feeds.restore(service,720).then(value=>{const old=records.get(service.id);if(value&&!old?.traffic_summary&&!old?.provider_metrics)setRecord(service,value,old?.error);});
+  setInterval(()=>{if(!document.hidden)updateClock();},1000);
+  refresh();setInterval(()=>{if(!document.hidden)refresh();},5000);
+})();
+</script></body></html>

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Salad bandwidth measurements, current node health and historical IP contributions.">
+  <title>Salad</title>
+  <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg?v=2e226a06b89feb65f678cb0aa2da370bd969b39c0e5333307b40fc2a4e50c9f0">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="sidebar-collapsed">
+  <a class="skip-link" href="#bandwidthPanel">Skip to measurements</a>
+  <aside id="sidebar" class="sidebar" data-state="collapsed">
+    <div class="side-top"><button id="sidebarExpand" class="brand" aria-label="Expand sidebar"><svg class="brand-mark" viewBox="0 0 44 52" aria-hidden="true"><use href="/salad-logo.svg#mark"/></svg><svg class="brand-word" viewBox="54 21 54 19" role="img" aria-label="Salad"><use href="/salad-logo.svg#word"/></svg></button><button id="sidebarCollapse" class="side-collapse btn btn-sm" aria-label="Collapse sidebar">‹</button></div>
+    <a class="overview-link" href="/overview" aria-label="Overview" title="Overview"><span class="service-mark" aria-hidden="true">◫</span><span class="service-name">Overview</span></a>
+    <nav id="services" role="tablist" aria-label="Services" aria-orientation="vertical"></nav>
+    <button id="themeToggle" class="theme-toggle btn btn-outline-secondary btn-sm" aria-label="Switch to dark mode">Dark mode</button>
+  </aside>
+  <button id="sidebarScrim" class="sidebar-scrim" aria-label="Close sidebar" hidden></button>
+  <div class="workspace">
+        <main><section id="bandwidthPanel" role="region" tabindex="-1"></section></main>
+  </div>
+  <script src="/ps1.js" defer></script><script src="/fleet-test.js" defer></script>
+</body>
+</html>

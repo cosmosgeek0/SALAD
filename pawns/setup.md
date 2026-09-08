@@ -41,7 +41,7 @@ Under **Environment Variables**, add:
 
 Click **Configure** inside each editor to save it. Enter passwords only in the runtime configuration, never in source files, Markdown, build commands or image tags.
 
-In **Allowed Countries → Edit**, use the countries approved for this deployment. The current trial selected Great Britain (`country_codes: ["gb"]`). Preserve the live selection when updating the image. An empty list allows arbitrary countries. [Salad's country-setting reference](https://docs.salad.com/reference/saladcloud-api/container-groups/get-container-group).
+In **Allowed Countries → Edit**, use the countries approved for this deployment. The live filter measured on September 8, 2026 UTC selected the United States (`country_codes: ["us"]`). Preserve the live selection when updating the image. An empty list allows arbitrary countries. [Salad's country-setting reference](https://docs.salad.com/reference/saladcloud-api/container-groups/get-container-group).
 
 The measured group used CPU batch priority and `restart_policy: "always"`. Retain that CPU-only/default restart configuration. Leaving Command empty runs the launcher in the image.
 

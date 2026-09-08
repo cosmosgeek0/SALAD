@@ -24,7 +24,7 @@ The computer builds an image; Salad runs it in the countries selected on its con
 
 The Markdown files explain the work; the source files beside them are the actual program. Keep the **whole folder** when making a recovery copy. A Markdown file alone no longer contains an embedded copy of the program.
 
-The recorded resource configuration was measured on September 7, 2026: one replica, one vCPU and 1024 MiB memory. The current country trial selected Great Britain (`gb`). Preserve the group's current country filter when updating it. New machines, IPs, traffic and earnings will vary. A running SDK and raw network traffic do not establish provider credits or profit. Healthy connected machines stay running when traffic or earnings are low.
+The live configuration was measured on September 8, 2026 UTC: one replica, one vCPU, 1024 MiB memory and the United States country filter (`us`). Preserve the group's current country filter when updating it. New machines, IPs, traffic and earnings will vary. A running SDK and raw network traffic do not establish provider credits or profit. Healthy connected machines stay running when traffic or earnings are low.
 
 Put Pawns work and temporary files inside this folder. Remove temporary work when finished. Passwords stay in the provider's runtime configuration and configured credential store, outside the source and documentation.
 

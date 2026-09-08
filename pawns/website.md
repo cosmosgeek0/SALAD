@@ -4,7 +4,7 @@
 
 ## Current website
 
-Open [Pawns on the bandwidth website](https://salad.cosmosgeek.org/#pawns). Production was moved to Mumbai; the old Mac collectors were unloaded. The live server keeps its own installed collector and measurements. Local source organization does not redeploy or restart it.
+Open [Pawns on the bandwidth website](https://salad.cosmosgeek.org/pawns-app). Production was moved to Mumbai; the old Mac collectors were unloaded. The live server keeps its own installed collector and measurements. Local source organization does not redeploy or restart it.
 
 The complete shared website source and Linux recovery instructions start at [Website](../Website/README.md). Its [Recovery](../Website/RECOVERY.md), [Setup](../Website/SETUP.md) and [Operations](../Website/OPERATIONS.md) guides restore the host, credential access and services. The Pawns service is `salad-pawns.service`, its source is `/opt/salad/pawns/observe.py`, and its state is `/home/salad/.hg1/pawns`. Keep the disabled Mac recorders disabled.
 
@@ -14,7 +14,7 @@ The complete shared website source and Linux recovery instructions start at [Web
 
 `observe.py` uses the shared website's `dashboard.salad_api` and `dashboard.native_network` modules. It reads Salad logs using the configured `salad-bandwidth-api` secret through `/opt/salad/.runtime/keychain-store`; follow Website Setup's hidden credential prompt. It does not need a Pawns password on the recorder host. Its default cloud target is `cosmosgeeketh/default/pawns`; explicit `--organization`, `--project` and `--group` arguments select another authorized target.
 
-The collector rejects missing/mismatched cloud group IDs and malformed records while continuing with valid records. It deduplicates by group, instance, run and sequence. Replayed legacy records are reconciled to their runtime identity without adding their bytes again or refreshing their first receipt time. Minute splits are estimates based on elapsed overlap. Freshness uses original sample and receipt times, so rereading an old record does not make it fresh.
+The collector rejects missing/mismatched cloud group IDs and malformed records while continuing with valid records. It deduplicates by group, instance, run and sequence. Replayed legacy records are reconciled to their runtime identity without adding their bytes again or refreshing their first receipt time. Minute splits are estimates based on elapsed overlap. Freshness uses original sample and receipt times, so rereading an old record does not make it fresh. Salad's original `time` and `receive_time` strings are retained as `salad_time` and `salad_receive_time`: sample delivery metadata uses `SAMPLE_SOURCE` rows in `pawns_events`; provider and recovery rows retain the fields directly. Replaying retained logs fills each missing delivery timestamp independently and preserves any already recorded timestamp. It does not change recorded bytes, provider amounts or their first local receipt times.
 
 The chart records raw network traffic. Each current row shows the current run's sum of valid recorded interval durations and bytes; group totals and the chart retain departed runs. **Connected** requires a running SDK, a running Salad instance, fresh measurements and a fresh provider observation of that IP as active. Unknown provider state remains unverified instead of becoming a failure or a fabricated zero.
 

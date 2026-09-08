@@ -63,7 +63,8 @@ def parse_record(item, group_id, received_ms):
     row["legacy_instance"] = labels.get("instance_id")
     machine = row.get("machine") or labels.get("machine_id")
     row["machine"] = machine if isinstance(machine, str) and UUID.fullmatch(machine) else None
-    row.update(received_ms=received_ms, record_bytes=len(line.encode()) + 1)
+    row.update(received_ms=received_ms, record_bytes=len(line.encode()) + 1,
+               salad_time=item.get("time"), salad_receive_time=item.get("receive_time"))
     if row.get("ip") is not None:
         row["ip"] = str(ipaddress.ip_address(row["ip"]))
     if kind == "SAMPLE":
@@ -104,7 +105,12 @@ def prepare(store):
 
 
 def save_event(store, kind, row):
-    store.db.execute("INSERT OR IGNORE INTO pawns_events VALUES (?,?,?,?,?,?,?)",
+    store.db.execute("""INSERT INTO pawns_events VALUES (?,?,?,?,?,?,?)
+        ON CONFLICT(group_id,instance,observer,kind,seq) DO UPDATE SET data=json_set(pawns_events.data,
+            '$.salad_time',COALESCE(json_extract(pawns_events.data,'$.salad_time'),json_extract(excluded.data,'$.salad_time')),
+            '$.salad_receive_time',COALESCE(json_extract(pawns_events.data,'$.salad_receive_time'),json_extract(excluded.data,'$.salad_receive_time')))
+        WHERE (json_extract(pawns_events.data,'$.salad_time') IS NULL AND json_extract(excluded.data,'$.salad_time') IS NOT NULL)
+           OR (json_extract(pawns_events.data,'$.salad_receive_time') IS NULL AND json_extract(excluded.data,'$.salad_receive_time') IS NOT NULL)""",
         (row["group_id"], row["instance"], row["observer"], kind, row["seq"], row["time_ms"],
          json.dumps(row, separators=(",", ":"), allow_nan=False)))
 
@@ -131,6 +137,9 @@ def ingest(store, records):
     with store.lock, store.db:
         for kind, row in records:
             if kind == "SAMPLE":
+                save_event(store, "SAMPLE_SOURCE", {**{k: row[k] for k in
+                    ("group_id", "instance", "observer", "seq", "salad_time", "salad_receive_time")},
+                    "time_ms": row["end_ms"]})
                 detail = {k: row.get(k) for k in ("seq", "sdk_at", "deadline_ms")}
                 store.db.execute("""INSERT INTO pawns_events VALUES (?,?,?,'STATUS',0,?,?)
                     ON CONFLICT(group_id,instance,observer,kind,seq) DO UPDATE

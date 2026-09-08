@@ -1,0 +1,17 @@
+{
+  "config.json": "120baa499c53be53b930d1cbf28c90999416e67cb2399a819784416a8c33fdb0",
+  "container/start.sh": "6654e0f11669b62689c9b2601c4614ca258f06e3dcbd6266ad652b5d1e8fdf36",
+  "dashboard/static/earnfm.html": "5c6318efae8f2a5321fba1635db0996e7ede0f7b29bfc3a5741c72ad4de01546",
+  "dashboard/static/styles.css": "b7c37ee6cd698d1b327a51a62849a51d817435d166170a70791ebb6e68d7c9eb",
+  "earnfm.py": "4e8d949803f82f762a070381390f410fcfa9b2ff0bba22ec2267bda852249629",
+  "reference/historical-record.json": "f838ea2379b340917ab62699914b031d105dfb3fd419b4d73ff06b923c562dfb",
+  "scripts/earnfm-recorder.py": "7b85d51a4eaaf0a35c11ff3d6518aef392029dbb05d951f201381c291e210ebf",
+  "scripts/keychain-store.swift": "490eadaf1afb87a0f64bf6248254ccc48ac1171af9e2fc4c796c74c12c5ca045",
+  "tests/fixtures/test-client.go": "0c296468791fc30aab69865481299e3250f73e9cd21c259876fe133b6ef7a8bf",
+  "tests/fixtures/test-server.go": "66f6edbe678f63b3f2c752e713706827df3df2723bbad2d95ca68196348d68e0",
+  "tests/test_deploy.py": "11867512d65246e9d35045b00113dac11dcd5160efba297a6039c0cac88ed0e6",
+  "tests/test_recorder.py": "0cb1c1adf051e01eb4ad653c728371e7946ebd1d84030a45831f84461242569f",
+  "tests/test_recovery.py": "28589d8617aeb419cafa4abb112787ee7ac184755a8933b17c6901490b3c516a",
+  "tests/test_dashboard.py": "a46688a5520b46f705d50d91586660135efd9de4558edc57a804791a36d9f606",
+  "tests/test_dashboard.cjs": "324a0b1694a4d62d599b689b18ad6e9689ea104bfb05f75d0246a5638d2871b6"
+}

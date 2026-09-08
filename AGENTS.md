@@ -1,95 +1,60 @@
 # bandwidth reel
 
-This project is for bandwidth.
+## Messages between chats, and side chats
 
-## Attack every claim
+A message to another chat is an interrupt, not a conversation. Before sending one, read that chat's recent turns and see what it is doing. While it is mid-task, send nothing unless the message is critical: money at risk, a shared host or file about to collide, or an owner order it must have this minute. One thing per message, a few lines; never findings, plans, tables, or code. A message never changes the receiving chat's task; only the owner gives tasks. A claim relayed by another chat is unverified until the receiving chat has checked it itself.
 
-Every claim by a Fable, Codex, or any other model about a limit, a floor, a ceiling, "the fastest", "the best", or "cannot be done" is presumed wrong until it is measured on the actual system or read in full from a dated source. That covers its own claims, the critic's, and the previous chat's. Before stating any number, label it measured, published, or guessed, and say what it was measured against. When the owner disputes a limit, do not defend it: run parallel research agents, read the sources, measure again, and report what was found, including exactly where the earlier claim was wrong. Keep attacking each claim until no faster or better form is left to find, then build that one. A wrong limit stated with confidence is the worst defect in this project: it ends the search and the owner nearly builds on it.
+When a chat's task holds more than one piece of grinding work, or a piece that would pull it away from its own task, it spins up a side chat for that piece instead of doing it in the middle of its own work: a new chat handed this file, the exact task, the files and the live facts that task needs, and nothing else. It grinds on its own and reports its result once, when done. The main chat keeps its own task. A chat starts a side chat through the spawn-task chip, which the owner starts with one click. Sub-agents are the last resort, for one small narrow lookup that returns a fact; never for building, measuring, running, or reviewing. No more chats than the work has pieces.
 
-## Do the narrow thing
+Mistake on record: 2026-09-06, three chats sent each other dozens of long messages during each other's runs; a record run was restarted, a pipe test was stopped and restarted twice, and code was changed on relayed claims that were withdrawn an hour later; and the main chat ran every record, rerun, and critic round itself while its own task waited.
 
-The owner's last instruction is the whole task. Do exactly that and stop. A good result is not permission for the next step: not the next capability, not deployment, not a live command. When the owner says "just look" or "simulate", keep the work observational or simulated; do not add or execute live actions. Every mistake of this kind is recorded here with its date so the next worker does not repeat it.
+## Project and starting points
 
-Do not invent gates, ceremonies, or bloat for other agents to obey.
+This project runs bandwidth-sharing clients on Salad, records what each instance does, manages client recovery and presents the measurements on one shared website.
 
-The work is rewarded for exactly three things. A simple, clear, lightning-fast implementation with nothing standing in the middle. Live proof — your own dry read, then the authorized real run, nothing between. The owner's word followed without your own biases added. Code written once that works beats code edited twenty times; every shortcut becomes work for the next worker.
+- Work in this repository: `~/Desktop/salad`, remote `cosmosgeek0/SALAD`. The [root README](README.md) lists every protocol folder and its entry guide.
+- Read the relevant protocol's setup, source and recovery guide before changing it. Keep protocol-specific settings and implementation in that folder.
+- Shared page source and collector dependencies are in [Website/source](Website/source/); website setup, data definitions and hosting notes start at [Website/README.md](Website/README.md). Keep bundled copies consistent with their verified protocol source.
+- The public dashboard is `https://salad.cosmosgeek.org/`. Read [Website/OPERATIONS.md](Website/OPERATIONS.md) for deployment and data locations, and confirm the active runtime before changing it. Editing the local bundle does not deploy it.
+- Start at [Website/README.md](Website/README.md) for Linux production recovery, its connection map and required host configuration. Keep disabled Mac recorders disabled while production recording is owned elsewhere.
 
-Build it vertically, one complete working capability at a time. Long-term directions are not permission to build ahead.
+## Fix the complete flow
 
-The owner gives the current capability and execution path in chat. Do not ask the owner for what this file or the current chat already answers.
+- Use Honeygain and PacketStream as references for native health, recovery, recording boundaries and honest accounting. Read the actual implementation and adapt it to the target client; do not blindly copy its error strings, thresholds or provider assumptions.
+- Trace a reported problem through the native client, Salad state/log delivery, recorder, saved data, API and page. Find which layer failed; a different label or graph does not repair a failed client or missing recording.
+- Use the protocol's configured organization, group, image, country restrictions, resources and replica count. Read back the current configuration before a cloud change. Do not copy another protocol's identifiers or assume historical IPs are still assigned.
+- Implement recovery in the workload where supported, so routine client recovery does not require the Mac or a person clicking the dashboard.
+- Each protocol needs explicit handling for its actual failure states: rejected/overused IPs, failed startup, process exits, stalled connections and unavailable telemetry. Set thresholds from the client behavior and documented policy; record the reason for each decision.
+- Distinguish a bad node/IP from invalid account credentials, provider restrictions, a collector failure or low customer demand. Reallocation must address the observed cause. Use bounded retries and cooldowns to prevent repeated replacements that only spend credits.
+- Keep a native-healthy connected node running even with little or no traffic. Do not restart or reallocate it for a byte floor, an empty payload window, comparison with other nodes, or missing/unverified earnings. Record idle performance as an observation. Any earnings-based replacement policy needs separate explicit user direction and fresh, attributable provider evidence; a traffic counter is not that evidence.
+- Record a recovery attempt, whether Salad accepted it, and evidence of the replacement's identity and health. An accepted request alone is not a successful recovery.
+- Preserve active experiments, histories and baselines while fixing problems. Changes to deployment size, recording ownership or combined-container experiments belong to the user's requested scope.
 
-## Project
+## Record and display real measurements
 
-- Start and work inside the current project. Use external locations only when the owner names them or the current task requires them.
-- Ordinary frontend work changes only the frontend; review or deploy backend and service files only when the task changes their behavior.
-- Read, review, or change authentication and access files only when the current task requires work on that boundary.
-- Use existing configured access. Never expose, print, log, or copy credentials into project files or chat.
-- Use the owner's connected browser session when the task requires it; do not open another login.
-- Deploy only the finished files required by the current capability.
-- Only one worker edits the repository at a time. A new worker starts from this file, the complete code required by the current chat, and the last live output; no handover documents.
-- Unrelated repositories, parent folders, external files, memories, state files, handovers, evidence, Git history, and old instructions are not project context unless the owner names an exact item.
-- The current chat instruction is the only task. Do not invent or search for additional context.
+- Keep Salad running state, native client acceptance, measured network traffic and provider-reported credits separate. RX + TX does not establish sold traffic or earnings.
+- Preserve source timestamps, receipt times, group/instance/machine identity, run boundaries and counter units. Deduplicate repeated logs. Do not calculate deltas across a reset or replacement.
+- Missing or stale data must remain visibly unknown. Keep a measured zero distinct from an absent sample. Report the actual error and which source is stale.
+- Keep provider units, observation time and account/device scope with every earnings value. Do not allocate account earnings to individual IPs without evidence.
+- Keep one shared minute bar chart above simple server rows. Offer 1, 6, 12 and 24 hours, defaulting to 24. The selected range applies across all protocol tabs and must not reset when switching services. Hover/click shows the contributing IPs, countries and MB for that minute; avoid extra charts and permanent contributor lists.
+- Show running/confirmed counts, measured totals, selected-period traffic, available provider credits and elapsed time. Each row should show the country name before its IP, client/cloud state, MB/min, recorded MB, duration, freshness and errors. Label unavailable measurements honestly.
+- Do not repeatedly scan full retained history on every browser refresh. Check chart/API performance with realistic history and the actual deployed CPU setting. A temporary CPU boost is not evidence that the normal setting can sustain the load.
 
-## Work style
+## One integration path to Git
 
-- Prefer the smallest clear implementation that fully works. Working bloat is rejected.
-- Before editing, also quote the AGENTS.md lines that govern the change.
-- Judge simplicity by the complete flow: direct steps, plain names, few moving parts, and no repeated behavior.
-- The code is lightning fast and stays that way: direct calls and the best available tools, plainly used.
-- Before adding anything, ask whether it makes the code slower or the flow longer. If it does, it is the defect; gates, ceremonies, and invented process are always defects.
-- If the repository is empty, start with one working Python file. Otherwise extend the current working program.
-- Build vertically. Do not create separate pieces and hope to connect them later.
-- Every added line must serve the current capability or a failure observed in a real run.
-- Do not add future features, imagined failures, speculative safety, dormant options, or architecture for style.
-- Do not invent approval gates or add ceremonies, pipelines, or background runners outside the owner's requested scope.
-- Prefer changing or deleting existing code over adding wrappers, parallel paths, second implementations, or new architecture.
-- When new code replaces old behavior, delete the old behavior. "It still works" and "it is harmless" are not reasons to keep it.
-- When a section has rotted, rewrite it fresh from what it must do. Do not repair it patch by patch, and do not paste blocks from old code.
-- Keep one implementation for each behavior and one definition for each measured value.
-- Extract shared code only after real repetition exists and only when the complete flow becomes simpler.
-- Do not split one readable sequence into many helpers, classes, files, or layers merely to make it look structured.
-- Use ordinary names that describe the real action. Do not invent project vocabulary, decorative architecture names, banner comments, boxed separators, slogans, or stylistic structure.
-- If the owner says to delete something, delete it. Do not preserve, archive, disable, rename, or argue that it may be useful later.
+- Protocol tasks finish their client, recovery and recorder changes in their own folders. The website task owns the user's latest UI requirements and the shared website bundle. Respect the current deployment/security owner's files during integration.
+- One coordinating task collects completed deliveries and handles shared integration, staging, commit and push. Do not edit the same shared files from several tasks or interrupt owners with repeated delivery requests.
+- Before committing, verify the complete delivered flow: native state and recovery results, saved samples matching API/row/chart values, correctly scoped provider figures, all affected pages, performance and a reproducible source bundle. Record evidence for the actual final source; an earlier test pass does not verify later edits.
+- Make the combined commit only after the protocol repairs, website UI and deployment changes required by that release are finished and verified. Keep missing evidence and known failures open until resolved. Include only completed source and guides; exclude secrets, live measurements and unfinished work.
 
-## Build and verify
+## Rebuild, verify and save
 
-- When the chat names several capabilities, build them strictly in the named order. Complete, live-test, review, and correct one before writing the next.
-- Before each capability, reread `AGENTS.md` and the complete current code for that capability.
-- Before editing, state the capability, files, functions, why each change is needed, and the rough net line change.
-- Stop before writing if the solution is unexpectedly large or needs an additional permanent file, class, dependency, abstraction, or parallel implementation.
-- After writing, reread the complete changed flow.
-- Remove unused imports, unused variables, duplicate logic, unnecessary helpers, speculative branches, commented-out old code, decorative comments, and temporary files.
-- Do not create test files by default. Run only quick syntax, import, and exact-arithmetic checks when needed.
-- Test the complete current program on the actual system using only the owner-authorized scope and execution path.
-- After each live run, compare every printed action, number, and label with the actual system. Inaccurate or misleading output means the capability has not passed; correct it and rerun before continuing.
-- Failure is allowed. Stop at the first real failure.
-- Report the exact step, exact error, completed actions, and current system state.
-- Make only the smallest change required by that failure, then run the whole program again.
-- Do not add handling for similar failures that have not happened.
-- Do not commit experiments or small edits. Commit only after the capability works live and the owner asks.
-
-## Review
-
-- After each capability passes live, and before any claim reaches the owner, run one independent Astra GPT-6 critic at max or ultra reasoning.
-- Run the critic locally: `codex exec -m gpt-6-astra -c 'model_reasoning_effort="ultra"' -c 'service_tier="priority"' -s read-only --skip-git-repo-check` with the complete packet on stdin (`max` is the other allowed effort). Never use a Claude sub-agent as the critic. Trust the verdict only after the printed session header confirms model gpt-6-astra with max or ultra reasoning. Verified 2026-09-06: the names gpt-6, gpt-6-astra-max and gpt-6-astra-ultracore are refused by codex.
-- The critic reads `AGENTS.md`, every active file the change touches and the files they import, excluding authentication and access files unless the current task changes them, plus the exact change and live output.
-- The packet is one self-contained text: this file verbatim, the owner's task verbatim, every file in that set in full, the exact change with before and after code, all live output including failed runs, and prior rounds' adjudicated results. Never include the builder's own review or conclusions.
-- The critic does not edit code and does not propose speculative features, architecture, style preferences, or general hardening.
-- Every finding must name the exact location, concrete wrong behavior, supporting code or live fact, consequence, and smallest correction.
-- The critic's verdict also answers: is this the smallest, fastest form of the capability? Structure beyond that is a concrete defect, not a style preference.
-- The builder verifies every finding against the code and actual system. Confirmed findings earn the smallest fix and a full live rerun. Unsupported findings are rejected.
-- Repeat fix, full live rerun with the capability's authorized inputs and execution path, and critic until it answers "no concrete defect found", then freeze the capability.
-- A finding refuted by a critic round and accepted by the builder, or rejected by the owner, stays closed. Reopen only on a new live failure or an owner instruction.
-- No other reviewer model is used unless the owner explicitly changes it.
-- UI review adds `claude -p --model opus --effort xhigh` as a second critic, run in parallel on the same packet.
-
-## Finish
-
-- Stop after the last capability named in the current chat works.
-- Do not harden, generalize, restructure, refactor, polish, or start the next capability.
-- Compare the result with the simplest direct implementation. Use the smaller version when it stays equally clear and complete.
-- Before returning, inspect everything created or changed during the task and remove anything the working program does not need.
-- Remove task-only residue created during this run, including scratch scripts, temporary tests, hidden agent folders, plans, generated reports, traces, notes, caches, .codex, and .claude artifacts.
-- Of the files created or changed during this task, leave only what the working capability needs. Do not delete unrelated pre-existing project files.
-- Return the live result, files changed, line count before and after, each function added or changed in plain words, every real failure and its exact fix, and what was deliberately not added.
-- The owner must be able to understand the complete active flow line by line.
+- Keep ordinary source files and focused setup, monitoring and recovery guides. Include required tools, secret names and how to supply them, image references, deployment commands and observed failure remedies. Keep secret values out of guides, browser responses, logs and Git.
+- Make a rebuild possible from the saved source plus the stated external accounts and dependencies. Distinguish local simulation, a successful build and a verified live deployment. Historical data and identical traffic/earnings cannot be recreated from source alone.
+- For Honeygain, PacketStream and Website, [restore.py](restore.py) verifies source manifests and restores to an explicitly chosen directory. Use a fresh staging directory for reconstruction checks; preserve conflicting existing installations. Other protocol folders document their own setup.
+- Check manifests and shared-file compatibility after completed source changes. A mismatch needs investigation; do not refresh a checksum merely to hide an unfinished or unexplained change.
+- Choose checks that exercise the failure being fixed. Counter changes need known inputs and expected deltas; recovery changes need failure and replacement cases; shared website changes need the affected protocols checked. Use a focused independent review when the change warrants it. Documentation edits need accuracy, path and command checks.
+- Verify live claims using actual client logs, source freshness, persisted records and provider evidence. State what was checked, when, and what remains unverified. Do not describe a running process or HTTP 200 as proof the whole system works.
+- Preserve databases and collection cursors together. Use a consistent database backup, such as SQLite's backup API, before moving live measurements.
+- Before the final commit/push, inspect the exact staged files and check that they are the versions verified together. A source backup and a measurement backup are separate.
+- Remove only your own temporary files once they are no longer needed. Preserve other tasks' work and real measurements. Finish with the actual change, verification result and any remaining blocker.

@@ -1,0 +1,42 @@
+[Unit]
+Description=Salad grass
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=salad
+Group=salad
+WorkingDirectory=/opt/salad
+Environment=PYTHONPATH=/opt/salad
+Environment=HG_FLEET_DIR=/home/salad/.hg1/hg-fleet
+ExecStart=/usr/bin/python3 -B scripts/grass-recorder.py
+Restart=on-failure
+RestartSec=5
+UMask=0077
+RuntimeDirectory=salad-credentials
+RuntimeDirectoryMode=0700
+RuntimeDirectoryPreserve=yes
+
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+ReadWritePaths=/home/salad/.hg1/grass /run/salad-credentials
+InaccessiblePaths=/etc/cloudflared-salad /run/salad-ui
+
+[Install]
+WantedBy=multi-user.target

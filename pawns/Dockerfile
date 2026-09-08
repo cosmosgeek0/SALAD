@@ -15,4 +15,5 @@ WORKDIR /app
 COPY --from=build /build/runner.exe /build/libpawns.dll /app/
 COPY run.py .
 ENV WINEDEBUG=-all WINEARCH=win64 WINEPREFIX=/tmp/pawns-wine
+HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=3 CMD ["python3", "/app/run.py", "--healthcheck"]
 ENTRYPOINT ["python3", "-u", "/app/run.py"]

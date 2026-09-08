@@ -1,0 +1,22 @@
+[Unit]
+Description=Repocket provider earnings recorder
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=salad
+Group=salad
+WorkingDirectory=/opt/salad
+Environment=PYTHONPATH=/opt/salad
+ExecStart=/usr/bin/python3 -B repocket-monitor/provider.py
+Restart=on-failure
+RestartSec=10
+RuntimeDirectory=salad-credentials
+RuntimeDirectoryMode=0700
+RuntimeDirectoryPreserve=yes
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,56 @@
+[Unit]
+Description=Salad dashboard
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=salad-ui
+Group=salad-ui
+WorkingDirectory=/run/salad-ui-code
+Environment=HOME=/home/salad
+Environment=PYTHONPATH=/run/salad-ui-code
+Environment=PS_ORGANIZATION=hyperlane
+Environment=PS_PROJECT=default
+Environment=PS_GROUP=ps-test-us
+ExecStart=/usr/bin/python3 -B -m dashboard.server --data-dir /home/salad/.hg1
+Restart=on-failure
+RestartSec=5
+RuntimeDirectory=salad-ui-code salad-ui
+RuntimeDirectoryMode=0750
+UMask=0077
+
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=read-only
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectSystem=strict
+IPAddressDeny=any
+RestrictAddressFamilies=AF_UNIX
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+BindReadOnlyPaths=/opt/salad/dashboard/__init__.py:/run/salad-ui-code/dashboard/__init__.py
+BindReadOnlyPaths=/opt/salad/dashboard/server.py:/run/salad-ui-code/dashboard/server.py
+BindReadOnlyPaths=/opt/salad/proxyrack.py:/run/salad-ui-code/proxyrack.py
+BindReadOnlyPaths=/opt/salad/dashboard/packetstream.py:/run/salad-ui-code/dashboard/packetstream.py
+BindReadOnlyPaths=/opt/salad/dashboard/store.py:/run/salad-ui-code/dashboard/store.py
+BindReadOnlyPaths=/opt/salad/dashboard/native_network.py:/run/salad-ui-code/dashboard/native_network.py
+BindReadOnlyPaths=/opt/salad/dashboard/fleet_test.py:/run/salad-ui-code/dashboard/fleet_test.py
+BindReadOnlyPaths=/opt/salad/dashboard/traffmonetizer.py:/run/salad-ui-code/dashboard/traffmonetizer.py
+BindReadOnlyPaths=/opt/salad/dashboard/static:/run/salad-ui-code/dashboard/static
+ReadOnlyPaths=/run/salad-ui-code /home/salad/.hg1
+ReadWritePaths=/home/salad/.hg1/packetstream/provider-observations.jsonl
+InaccessiblePaths=/opt/salad /etc/cloudflared-salad -/run/salad-credentials
+
+[Install]
+WantedBy=multi-user.target

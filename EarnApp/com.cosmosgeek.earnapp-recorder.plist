@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.cosmosgeek.earnapp-recorder</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/bin/python3</string>
+		<string>/Users/cosmosgeek/Desktop/salad/EarnApp/earnapp-recorder.py</string>
+	</array>
+	<key>WorkingDirectory</key>
+	<string>/Users/cosmosgeek/Desktop/salad/EarnApp</string>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>EARNAPP_DATA_DIR</key>
+		<string>/Users/cosmosgeek/Desktop/salad/EarnApp/data</string>
+		<key>SALAD_KEY_HELPER</key>
+		<string>/Users/cosmosgeek/Library/Application Support/Salad Bandwidth Dashboard/.runtime/keychain-store</string>
+		<key>PYTHONDONTWRITEBYTECODE</key>
+		<string>1</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>10</integer>
+	<key>ProcessType</key>
+	<string>Background</string>
+	<key>StandardOutPath</key>
+	<string>/Users/cosmosgeek/Desktop/salad/EarnApp/data/recorder.out.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/cosmosgeek/Desktop/salad/EarnApp/data/recorder.err.log</string>
+</dict>
+</plist>

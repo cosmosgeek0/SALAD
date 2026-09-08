@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EarnFM · bandwidth</title><link rel="stylesheet" href="/styles.css">
+<style>
+nav a{padding:5px 9px;color:#155e9e;text-decoration:none;border:1px solid #aaa;border-radius:2px}nav a[aria-current]{background:#ededed;color:#161616;font-weight:700}.ef-chart-wrap{position:relative}.ef-chart{width:100%;height:270px;display:block;border:1px solid #bbb}.ef-bar{fill:#1266ad;cursor:pointer}.ef-bar.partial{fill:#9abbd6}.ef-bar.selected{fill:#173f68;stroke:#000;stroke-width:1}.ef-table{min-width:950px}.ef-table small{display:block;margin-top:3px}.ef-table td:first-child{max-width:250px;overflow-wrap:anywhere}.ef-provider{padding:9px 0;border-block:1px solid #ddd;margin:10px 0}.ef-controls{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.ef-controls label{font-size:12px}.ef-controls select{margin-left:6px}#efSummary{font-size:15px;font-weight:600}.ef-small{font-size:12px;color:#555}.ef-popup{position:absolute;z-index:3;top:calc(100% + 4px);right:8px;width:430px;max-width:calc(100% - 16px);max-height:250px;overflow:auto;padding:10px;background:#fff;border:1px solid #888;box-shadow:0 2px 8px #0002;font-size:12px}.ef-popup header{align-items:start;margin-bottom:5px}.ef-popup header p{margin:0}.ef-popup button{padding:2px 6px}.ef-popup table{min-width:0}.ef-popup th,.ef-popup td{padding:4px 6px}.ef-popup td small{display:block;overflow-wrap:anywhere}.ef-popup th:last-child,.ef-popup td:last-child{text-align:right;white-space:nowrap}
+</style>
+</head><body class="standalone">
+<aside class="sidebar"><a class="brand" href="/#earnfm"><span class="brand-mark" aria-hidden="true">s</span><span>salad<span class="brand-caption">BANDWIDTH</span></span></a><p class="nav-label">Services</p><nav class="standalone-services" aria-label="Services"><a href="/#hg1">Honeygain</a><a href="/#ps1">PacketStream</a><a href="/#proxyrack">Proxyrack</a><a href="/#rp">Repocket</a><a href="/#earnfm" aria-current="page">EarnFM</a><a href="/#tm">Traffic Monetizer</a><a href="/#pawns">Pawns.app</a><a href="/#earnapp">EarnApp</a><a href="/#grass">Grass</a></nav></aside><div class="workspace"><header class="topbar"><span>Workspace / EarnFM detail</span><span id="efStatus" role="status">Loading recorded data…</span></header>
+<main><div class="page-head"><div><p class="eyebrow">Service detail</p><h1>EarnFM</h1></div><a href="/#earnfm">Overview &amp; IP history →</a></div><p id="efNotice" class="notice hidden" role="status"></p><p id="efSummary"></p><p id="efTime" class="ef-small"></p>
+<div class="ef-provider"><p id="efEarnings">Fetching EarnFM’s account credits…</p><p id="efProviderTime" class="ef-small"></p></div>
+<div class="ef-controls"><h2>Recorded network MB by minute</h2><label>Show<select id="efRange"><option value="60">Last 1 hour</option><option value="360">Last 6 hours</option><option value="720">Last 12 hours</option><option value="1440" selected>Last 24 hours</option></select></label><a href="/ef.json" download="earnfm-recording.json">Download data</a></div>
+<p id="efPeriod" class="ef-small"></p>
+<p class="ef-small">Measured interface RX + TX includes control traffic and relay crossings. It is not paid bandwidth. Pale bars have partial coverage; missing minutes are unknown. Hover or click a bar for its recorded IPs and countries.</p>
+<div id="efChartWrap" class="ef-chart-wrap"><svg id="efChart" class="ef-chart" role="group" aria-label="EarnFM network traffic by minute"></svg>
+<div id="efPopup" class="ef-popup hidden" role="dialog" aria-label="Recorded minute contributors"><header><p id="efPopupTitle"></p><button id="efPopupClose" type="button" aria-label="Close minute contributors">Close</button></header><p id="efPopupNote"></p><table><thead><tr><th>Recorded IP / country / instance</th><th>MB</th></tr></thead><tbody id="efPopupRows"></tbody></table></div></div>
+<div class="table-scroll"><table class="ef-table"><thead><tr><th>Server / observed instance</th><th>EarnFM</th><th>Client / Salad</th><th>MB/min</th><th>Recorded MB</th><th>Recorded duration</th><th>Source freshness</th></tr></thead><tbody id="efWorkers"></tbody></table></div>
+<p id="efRecovery" class="ef-small"></p>
+<p class="ef-small">Recovery runs inside each container. This page observes it. A replacement request being accepted does not prove that a healthy successor is online. Credits are account-wide; per-device paid bandwidth and earnings are unavailable.</p>
+</main></div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id),finite=n=>typeof n==='number'&&Number.isFinite(n);
+const number=(n,d=3)=>finite(n)?n.toLocaleString(undefined,{maximumFractionDigits:d}):'—';
+const when=n=>finite(n)&&n>0?new Date(n).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}):'—';
+const freshAt=(n,limit)=>finite(n)&&n>0&&Date.now()-n>=0&&Date.now()-n<limit;
+function duration(n){if(!finite(n)||n<0)return '—';let s=Math.floor(n/1000);const h=Math.floor(s/3600);s%=3600;const m=Math.floor(s/60);s%=60;return `${h?`${h}h `:''}${h||m?`${m}m `:''}${s}s`}
+function age(n){if(!finite(n)||n<=0)return 'Not recorded';const elapsed=Date.now()-n;return elapsed<0?`Clock ahead by ${duration(-elapsed)}`:`${duration(elapsed)} ago`}
+const human=s=>String(s||'').replace(/_/g,' ');
+const stateNames={starting:'Starting',connecting:'Connecting',running:'Client running',retrying:'Restarting',connection_error:'Connection error',observer_unknown:'Telemetry unknown',rate_limited:'Provider cooldown',authorization_error:'Authorization error',provider_rejected:'Provider rejected',stopping:'Stopping',stopped:'Stopped',reallocating:'Replacement requested',awaiting_sample:'Awaiting current-instance sample'};
+let data=null,selected=null,pinned=false,pending=false,failed=false;
+function element(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e}
+function svg(tag,attrs,text){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);if(text!==undefined)e.textContent=text;return e}
+function recorderFresh(){return !failed&&freshAt(data?.generated_ms,150000)}
+function inventoryFresh(){return recorderFresh()&&freshAt(data?.inventory_ms,90000)}
+function freshWorker(w){return inventoryFresh()&&freshAt(w.sample_ms,90000)&&!w.final}
+function deviceTime(){const p=data?.provider||{};return Object.hasOwn(p,'devices_observed_ms')?p.devices_observed_ms:p.observed_ms}
+function devicesFresh(){return !failed&&!data?.provider?.error&&freshAt(deviceTime(),180000)}
+function confirmed(w){return freshWorker(w)&&devicesFresh()&&w.salad_state==='running'&&w.client_state==='running'&&w.provider_online===true&&(data.provider.devices||[]).some(d=>d.instance===(w.runtime_instance||w.instance))}
+function pointsInRange(){const end=Math.floor(Date.now()/60000)*60000,start=end-(Number($('efRange').value)-1)*60000;return (data?.points||[]).filter(p=>finite(p.time_ms)&&p.time_ms>=start&&p.time_ms<=end&&finite(p.mb)&&p.mb>=0)}
+function contributions(point){
+ if(Array.isArray(point.contributions))return point.contributions.filter(c=>Array.isArray(c)&&finite(c[1])&&c[1]>=0).map(c=>({...data.history_nodes?.[c[0]],mb:c[1],duration_ms:c[2]}));
+ return Object.entries(point.by_instance||{}).filter(([,mb])=>finite(mb)&&mb>=0).map(([instance,mb])=>({instance,mb}));
+}
+function closePopup(){selected=null;pinned=false;$('efPopup').classList.add('hidden');for(const bar of $('efChart').querySelectorAll('.selected'))bar.classList.remove('selected')}
+function showPopup(point,pin=false){
+ selected=point.time_ms;pinned=pin||pinned;
+ $('efPopup').classList.remove('hidden');$('efPopupTitle').textContent=`${when(point.time_ms)} · ${number(point.mb,6)} MB`;
+ const notes=[point.partial?'Partial recording coverage':'Recorded minute',point.estimated?'Some intervals were divided across minute boundaries':null,pinned?'Pinned · Escape or Close to dismiss':'Click the bar to keep this open'].filter(Boolean);
+ $('efPopupNote').textContent=notes.join(' · ');
+ const body=$('efPopupRows');body.replaceChildren();let attributed=0;
+ for(const node of contributions(point)){attributed+=node.mb;const row=element('tr'),identity=element('td',`${node.ip||'Historical IP not recorded'} · ${node.country||'Country unverified'}`);identity.append(element('small',node.instance||'Instance not recorded'));if(node.run)identity.title=`Run: ${node.run}${finite(node.duration_ms)?` · recorded ${duration(node.duration_ms)}`:''}`;row.append(identity,element('td',number(node.mb,6)));body.append(row)}
+ const missing=point.mb-attributed;
+ if(missing>.000001||!body.children.length){const row=element('tr');row.append(element('td','Contributor identity not recorded'),element('td',number(Math.max(0,missing),6)));body.append(row)}
+ if(missing<-.000001)$('efPopupNote').textContent+=' · Recorded contributor totals disagree with this minute';
+ for(const bar of $('efChart').querySelectorAll('.ef-bar'))bar.classList.toggle('selected',Number(bar.getAttribute('data-minute'))===selected);
+}
+function draw(){
+ if(!data)return;
+ const chart=$('efChart'),width=Math.max(300,chart.clientWidth),height=270,left=58,right=12,top=18,bottom=42;
+ chart.setAttribute('viewBox',`0 0 ${width} ${height}`);chart.replaceChildren();
+ const end=Math.floor(Date.now()/60000)*60000,range=Number($('efRange').value),start=end-(range-1)*60000,points=pointsInRange(),maximum=Math.max(.001,...points.map(p=>p.mb));
+ const w=width-left-right,h=height-top-bottom,total=points.reduce((sum,p)=>sum+p.mb,0);
+ $('efPeriod').textContent=`Selected ${range/60}h: ${points.length?`${number(total,6)} MB recorded`:'no recorded samples'} · ${points.length}/${range} minutes have recordings`;
+ for(let i=0;i<=4;i++){const y=top+h-i*h/4;chart.append(svg('line',{x1:left,y1:y,x2:width-right,y2:y,stroke:'#ddd'}),svg('text',{x:left-7,y:y+4,'text-anchor':'end','font-size':11,fill:'#555'},number(maximum*i/4)))}
+ for(let i=0;i<=4;i++){const t=start+(end-start)*i/4,x=left+w*i/4;chart.append(svg('text',{x,y:height-13,'text-anchor':i===0?'start':i===4?'end':'middle','font-size':11,fill:'#555'},new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false})))}
+ if(!points.length)chart.append(svg('text',{x:width/2,y:height/2,'text-anchor':'middle','font-size':14,fill:'#666'},'No recorded samples in this period'));
+ for(const p of points){const x=left+(p.time_ms-start)/60000*w/range,bh=p.mb/maximum*h;
+  const bar=svg('rect',{x,y:top+h-Math.max(1,bh),width:Math.max(1,w/range-1),height:Math.max(1,bh),class:`ef-bar ${p.partial?'partial':''} ${selected===p.time_ms?'selected':''}`,'data-minute':p.time_ms,tabindex:0,role:'button','aria-label':`${when(p.time_ms)}: ${number(p.mb)} MB${p.partial?', partial coverage':''}${p.estimated?', estimated minute assignment':''}`});
+  bar.append(svg('title',{},`${when(p.time_ms)} · ${number(p.mb,6)} MB`));
+  bar.addEventListener('pointerenter',()=>{if(!pinned)showPopup(p)});bar.addEventListener('focus',()=>{if(!pinned)showPopup(p)});bar.addEventListener('click',()=>showPopup(p,true));bar.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showPopup(p,true)}});chart.append(bar)
+ }
+ const active=points.find(p=>p.time_ms===selected);if(active)showPopup(active,pinned);else closePopup();
+}
+function rows(){
+ if(!data)return;
+ const body=$('efWorkers');body.replaceChildren();
+ data.workers.forEach((w,i)=>{const row=element('tr'),name=element('td',`${i+1}. ${String(w.machine||'Machine pending').slice(0,12)}`);name.append(element('small',w.runtime_instance||w.instance||'Instance pending'));
+  if(w.runtime_instance&&w.runtime_instance!==w.instance)name.append(element('small',`Salad inventory ID: ${w.instance}`));
+  name.append(element('small',w.ip?`${w.ip} · ${w.country||'Country unverified'}`:w.last_provider_ip?`${w.last_provider_ip} · last provider observation ${when(w.last_provider_seen_ms)}`:'IP unverified'));
+  const fresh=freshWorker(w),online=confirmed(w),known=fresh&&devicesFresh(),state=stateNames[w.client_state]||human(w.client_state)||'Unknown';
+  const stateCell=element('td',`${state} / ${w.salad_state||'unknown'}${inventoryFresh()?'':' (last inventory)'}`,fresh&&w.client_state==='running'?'ok':'stale');
+  const errors=[w.error,w.health?.error&&w.health.error!=='none'?human(w.health.error):null].filter(Boolean);for(const error of new Set(errors))stateCell.append(element('small',error,'bad'));
+  const retry=w.health?.retry_at_ms??w.retry_at_ms;if(finite(retry)&&retry>0)stateCell.append(element('small',`Retry ${when(retry)}${retry<=Date.now()?' · awaiting next observation':''}`));
+  const freshness=element('td',`Sample ${age(w.sample_ms)}`,fresh?'ok':'stale');freshness.title=`Source: ${when(w.sample_ms)}; received: ${when(w.received_ms)}; recorded: ${when(w.recorded_ms)}`;
+  if(!inventoryFresh())freshness.append(element('small',`Inventory ${age(data.inventory_ms)}`));if(!recorderFresh())freshness.append(element('small',`Recorder ${age(data.generated_ms)}`));if(w.final)freshness.append(element('small','Final sample'));
+  row.append(name,element('td',online?'Confirmed online':known?'Not confirmed':'Unknown · reading stale or pending',online?'ok':'stale'),stateCell,element('td',fresh&&w.salad_state==='running'&&finite(w.kb_per_second)?number(w.kb_per_second*.06):'—'),element('td',number(w.total_mb,6)),element('td',duration(w.recorded_duration_ms)),freshness);body.append(row)
+ });
+ for(let i=data.workers.length;i<data.desired;i++){const row=element('tr');row.append(element('td',`${i+1}. ${inventoryFresh()?'Allocating':'Inventory unavailable'}`));for(let j=0;j<6;j++)row.append(element('td','—'));body.append(row)}
+}
+function recoveryText(event){
+ const labels={reallocate_requested:'replacement requested',reallocate_accepted:'replacement accepted',reallocate_failed:'replacement request failed',client_restart:'client restarted',cooldown_started:'provider cooldown started'};
+ let result=`${when(event.time_ms)} · ${String(event.instance||event.machine||'Unknown node').slice(0,12)}: ${labels[event.action]||human(event.action)}${event.reason?` (${human(event.reason)})`:''}`;
+ if(event.action==='reallocate_accepted')result+=inventoryFresh()&&typeof event.old_instance_present==='boolean'?(event.old_instance_present?' · old allocation still present':' · old allocation absent; successor health not linked'):' · inventory confirmation unavailable';
+ if(event.action==='reallocate_failed'&&event.http_status)result+=` · HTTP ${event.http_status}`;
+ if(finite(event.retry_at_ms)&&event.retry_at_ms>0)result+=` · retry ${when(event.retry_at_ms)}`;
+ return result;
+}
+function render(){
+ if(!data)return;
+ const p=data.provider||{},providerFresh=!failed&&!p.error&&freshAt(p.observed_ms,180000),history=data.provider_history||{};
+ $('efStatus').textContent=failed?'Cannot refresh EarnFM · last observations shown':recorderFresh()?`Recorder updated ${age(data.generated_ms)}`:`Recorder stale or unknown · ${age(data.generated_ms)}`;
+ const warnings=[data.error,p.error,!recorderFresh()?'Recorder reading is stale or unavailable':null,!inventoryFresh()?`Salad inventory is stale or unavailable (${age(data.inventory_ms)})`:null,!devicesFresh()?`EarnFM device list is stale or unavailable (${age(deviceTime())})`:null].filter(Boolean);$('efNotice').textContent=warnings.join(' · ');$('efNotice').classList.toggle('hidden',!warnings.length);
+ const cloud=inventoryFresh()?data.workers.filter(w=>w.salad_state==='running').length:null,online=inventoryFresh()&&devicesFresh()?data.workers.filter(confirmed).length:null;
+ $('efSummary').textContent=`${cloud===null?'—':cloud}/${data.desired} Salad containers running · ${online===null?'online confirmation unavailable':`${online} confirmed online by EarnFM`} · ${number(data.total_mb,6)} MB recorded across all runs`;
+ const elapsed=finite(data.test_started_ms)&&Date.now()>=data.test_started_ms?duration(Date.now()-data.test_started_ms):'—';
+ $('efTime').textContent=`SSH3 · Started ${when(data.test_started_ms)} · elapsed ${elapsed} · ${number(data.sample_count,0)} source samples saved`;
+ $('efEarnings').textContent=finite(p.balance)?`${providerFresh?'Account balance':'Last recorded account balance'} $${number(p.balance,6)} · ${number(p.gb,6)} GB credited total · change since provider baseline: $${number(p.earned,6)} / ${number(p.credited_mb,6)} MB credited`:'Account credits unavailable';
+ $('efProviderTime').textContent=`Account reading ${when(p.observed_ms)}${providerFresh?'':' (stale or unavailable)'} · device list ${when(deviceTime())}${devicesFresh()?'':' (stale or unavailable)'} · baseline ${when(p.baseline_ms)}${finite(history.observations)?` · ${number(history.observations,0)} saved account observations`:''}. Gross account credits; Salad costs have not been subtracted.`;
+ const recovery=Array.isArray(data.recent_recovery)?data.recent_recovery.slice(0,3):[];$('efRecovery').textContent=recovery.length?`Recent recovery: ${recovery.map(recoveryText).join(' | ')}`:'No recovery events are present in this recording; this alone does not prove that recovery has run.';
+ draw();rows();
+}
+async function refresh(){if(pending)return;pending=true;try{const response=await fetch('/ef.json',{cache:'no-store'});if(!response.ok)throw Error();const next=await response.json();if(!next||!Array.isArray(next.workers)||!Array.isArray(next.points))throw Error();data=next;failed=false;render()}catch{failed=true;$('efStatus').textContent='Cannot read the EarnFM recorder';if(data)render()}finally{pending=false}}
+$('efRange').addEventListener('change',()=>{closePopup();draw()});$('efPopupClose').addEventListener('click',closePopup);$('efChartWrap').addEventListener('pointerleave',()=>{if(!pinned)closePopup()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closePopup()});window.addEventListener('resize',draw);refresh();setInterval(refresh,15000);
+</script></body></html>

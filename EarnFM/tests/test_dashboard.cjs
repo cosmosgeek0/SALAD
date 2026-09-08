@@ -1,0 +1,13 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),vm=require('node:vm');
+const sourcePath=process.env.EARNFM_FRONTEND_SOURCE||path.resolve(__dirname,'../../Website/source/dashboard/static/fleet-test.js');
+const source=fs.readFileSync(sourcePath,'utf8'),model=require(sourcePath),now=1800000000000;
+const worker={instance:'one',runtime_instance:'one',salad_state:'running',client_state:'running',sample_ms:now-20000,received_ms:now-207000,recorded_ms:now-1000,kb_per_second:5,total_mb:12,recorded_duration_ms:60000,telemetry_note:'Salad receipt clock precedes source by 187s'};
+const d={generated_ms:now,inventory_ms:now,desired:1,workers:[worker],provider:{observed_ms:now,devices:[{instance:'one'}],error:null},points:[]};
+let result=model.normalize('earnfm',d,now);assert.equal(result.working,1);assert.equal(result.nodes[0].rate,.3);assert.equal(result.nodes[0].total,12);
+result=model.normalize('earnfm',{...d,workers:[{...worker,recorded_ms:now-180000}]},now);assert.equal(result.working,0);assert.equal(result.nodes[0].rate,null);
+const start=source.indexOf('    const balanceChange='),end=source.indexOf("    el('totals').classList.add",start);
+assert.ok(start>0&&end>start);let cards;
+const context={active:{id:'earnfm'},observed:{balance_change_usd:.108531,balance_window:{partial:true,covered_ms:3600000},credited_mb:1085.31},p:{balance_usd:.28986,observed_ms:now},model:{statusFresh:true,working:10},t:{inventory_ms:now,containers_running:10,containers_total:10,last_24h_mb:5284.4,average_mb_per_minute:3.7},comparison:{},rates:Array(10).fill(.1),currentRate:1,partialRate:false,hours:24,Date:{now:()=>now},valid:n=>typeof n==='number'&&Number.isFinite(n),fresh:()=>true,feeds:{providerFresh:()=>true},shown:n=>typeof n==='number'?String(n):'—',displayMB:n=>typeof n==='number'?String(n):'—',providerPeriod:()=>'',date:()=>'',metric:(label,value,unit,note)=>({label,value,unit,note}),el:()=>({replaceChildren:(...values)=>{cards=values;}})};
+vm.runInNewContext(source.slice(start,end),context);
+assert.equal(cards[5].label,'Balance change');assert.equal(cards[5].value,'≈ 0.108531');assert.equal(cards[7].label,'Account balance');assert.equal(cards[7].value,'0.28986');
+console.log('PASS: skewed receipt remains online with measured rate; stale recorder stays unknown; recorded USD balance/change are rendered explicitly.');

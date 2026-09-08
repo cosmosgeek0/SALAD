@@ -1,0 +1,12 @@
+[Unit]
+Description=Block EC2 role metadata from the routine SSH user
+After=network-pre.target
+Before=ssh.socket ssh.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c '/usr/sbin/iptables -w -C OUTPUT -d 169.254.169.254/32 -m owner --uid-owner ubuntu -j REJECT 2>/dev/null || /usr/sbin/iptables -w -I OUTPUT -d 169.254.169.254/32 -m owner --uid-owner ubuntu -j REJECT'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

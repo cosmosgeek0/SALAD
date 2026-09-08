@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PR — bandwidth test</title><style>
+:root{font:14px/1.45 system-ui,sans-serif;color:#161616;background:white}body{margin:0;padding:18px}header,.controls,.summary{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}h1{font-size:20px;margin:0}h2{font-size:16px}a{color:#1767a0}select{font:inherit;padding:5px}.summary{justify-content:flex-start;margin:15px 0}.summary span{white-space:nowrap}table{border-collapse:collapse;width:100%;font-size:12px}th,td{padding:8px;border:1px solid #ccc;text-align:left;vertical-align:top}th{background:#f2f2f2}.table-scroll{overflow:auto}.ok{color:#126428}.bad{color:#a22}.muted{font-size:12px;color:#555}.notice{background:#fff8ed;color:#8b3b00;padding:7px}.ps-chart{position:relative}.ps-chart-scroll{width:100%;overflow-x:auto;border:1px solid #bbb;margin:8px 0}.ps-chart-scroll canvas{display:block;height:230px;cursor:crosshair}.ps-popup{position:absolute;z-index:5;background:white;border:1px solid #888;padding:10px;width:320px;max-width:calc(100% - 24px);max-height:70vh;overflow:auto;font-size:12px;box-shadow:0 2px 8px #0002}.hidden{display:none!important}@media(max-width:650px){body{padding:10px}table{min-width:900px}}
+</style></head><body>
+<header><h1>PR — bandwidth test</h1><span id="connection" class="muted">Loading recorder…</span></header>
+<p class="muted"><a href="https://portal.salad.com/organizations/ssh1/projects/default/containers/pr">Salad PR group</a> · <a href="https://peer.proxyrack.com/devices">Provider devices</a></p>
+<div id="summary" class="summary"></div><p id="notice" class="notice hidden" role="status"></p>
+<div class="controls"><h2>PR · MB per minute</h2><label>Show <select id="hours" aria-label="Time range"><option value="1">1 hour</option><option value="6">6 hours</option><option value="12">12 hours</option><option value="24" selected>24 hours</option></select></label></div>
+<div class="ps-chart"><div id="chartScroll" class="ps-chart-scroll"><canvas id="trafficChart" tabindex="0" role="img"></canvas></div><div id="minutePopup" class="ps-popup hidden" role="tooltip"></div></div>
+<p class="muted">Hover or click a minute for its IPs, countries and measured MB. Blank = no measurement; amber = partial or estimated coverage. RX + TX includes both relay directions and monitoring overhead.</p>
+<div class="table-scroll"><table><thead><tr><th>Country / IP</th><th>Client</th><th>Salad</th><th>MB/min</th><th>Recorded MB</th><th>Recorded time</th><th>Source age</th><th>Error / note</th></tr></thead><tbody id="workers"></tbody></table></div>
+<p id="credits" class="muted"></p>
+<script src="/ps1.js"></script><script>
+"use strict";
+const $ = id => document.getElementById(id);
+const valid = value => typeof value === "number" && Number.isFinite(value);
+const num = value => !valid(value) ? "—" : value > 0 && value < 0.000001 ? value.toExponential(2) : value.toLocaleString(undefined, {maximumFractionDigits: value > 0 && value < 0.01 ? 6 : 3});
+const mb = value => valid(value) ? num(value) + " MB" : "Not reported";
+const duration = value => !valid(value) || value < 0 ? "—" : value < 60000 ? num(value / 1000) + "s" : Math.floor(value / 3600000) + "h " + Math.floor(value % 3600000 / 60000) + "m";
+const age = value => !valid(value) ? "unknown" : value < -10000 ? "clock ahead" : value < 60000 ? Math.max(0, Math.floor(value / 1000)) + "s" : (value / 60000).toFixed(1) + "m";
+const regions = new Intl.DisplayNames(["en"], {type: "region"});
+const country = code => typeof code === "string" && /^[a-z]{2}$/i.test(code) ? regions.of(code.toUpperCase()) : "Country unknown";
+const timeAge = (at, time) => age(valid(time) ? at - time : null);
+let data = null, busy = false, failed = false;
+const chart = createMinuteChart({canvas: $("trafficChart"), scroll: $("chartScroll"), popup: $("minutePopup"), active: () => true,
+  readMinute: async minute => data?.minutes?.find(point => point.minute_ms === minute) || {minute_ms: minute, mb: null, count: 0, nodes: []}});
+function render() {
+  if (!data) return;
+  const at = Date.now(), recent = (time, limit) => valid(time) && at - time >= -10000 && at - time <= limit;
+  const recorderFresh = !failed && recent(data.generated_ms, 90000);
+  const live = recorderFresh && recent(data.inventory_ms, 90000) && !data.cloud_error;
+  const workers = Array.isArray(data.workers) ? data.workers : [];
+  const sampleFresh = worker => live && recent(worker.last_sample_ms, 150000);
+  const hours = Number($("hours").value), end = Math.floor(at / 60000) * 60000, start = end - (hours * 60 - 1) * 60000;
+  const map = new Map((data.minutes || []).map(point => [point.minute_ms, point]));
+  const bars = Array.from({length: hours * 60}, (_, index) => map.get(start + index * 60000) || {minute_ms: start + index * 60000, mb: null, count: 0, nodes: [], partial: true});
+  const measured = bars.filter(point => valid(point.mb)), amount = measured.length ? measured.reduce((sum, point) => sum + point.mb, 0) : null;
+  const desired = valid(data.requested) ? String(data.requested) : "unknown";
+  const confirmed = live ? workers.filter(worker => sampleFresh(worker) && worker.connected === true && worker.salad_state === "running").length + "/" + desired : "Unknown";
+  const running = live ? workers.filter(worker => worker.salad_state === "running").length : "Unknown";
+  const balance = data.balance != null && data.balance !== "" ? String(data.balance) + (recent(data.balance_checked_ms, 900000) && !data.balance_error ? "" : " (stale)") : "Not reported";
+  const values = [["Clients confirmed", confirmed], ["Containers running", running], ["Network RX + TX", mb(data.total_recorded_mb)],
+    ["Last " + hours + (hours === 1 ? " hour" : " hours"), (measured.some(point => point.estimated) ? "≈ " : "") + mb(amount)],
+    ["Original provider counter", valid(data.provider_bandwidth_value) ? String(data.provider_bandwidth_value) + " (unit unverified; includes cached readings)" : "Not reported"],
+    ["Account balance", balance], ["Elapsed", duration(at - Date.parse(data.started_at))]];
+  $("summary").replaceChildren();
+  for (const [label, value] of values) { const node = document.createElement("span"); node.textContent = label + ": " + value; $("summary").append(node); }
+  $("connection").textContent = "Recorder " + timeAge(at, data.generated_ms) + " old · inventory " + timeAge(at, data.inventory_ms) + " old";
+  $("connection").className = live ? "muted" : "bad";
+  $("notice").textContent = failed ? "Cannot refresh PR. Last saved observations are shown." : data.cloud_error || (!recorderFresh ? "PR recorder is stale or missing. Current client status is unknown." : !live ? "PR inventory is stale or missing. Current client status is unknown." : data.backfilling ? "Retained history is being backfilled; totals are not complete yet." : "");
+  $("notice").classList.toggle("hidden", !$("notice").textContent);
+  $("workers").replaceChildren();
+  for (const worker of workers) {
+    const fresh = sampleFresh(worker), row = document.createElement("tr"); row.dataset.instance = worker.instance || worker.name || "";
+    const values = [country(worker.country) + " · " + (worker.ip || "IP unavailable"), fresh ? worker.status || "Unverified" : "Unverified",
+      (worker.salad_state || "—") + (live ? "" : " (last seen)"), num(fresh && worker.fresh && worker.salad_state === "running" ? worker.mb_per_minute : null), num(worker.network_mb), duration(worker.recorded_duration_ms),
+      "Native " + timeAge(at, worker.last_sample_ms) + " · received " + timeAge(at, worker.recorded_ms),
+      (fresh ? "" : "Last saved: ") + (worker.status_note || "Waiting for the recorded recovery policy.")];
+    values.forEach((value, index) => { const cell = document.createElement("td"); cell.textContent = value; if (index === 0) cell.title = worker.instance || worker.name || ""; if (index === 1) cell.className = fresh && worker.connected && worker.salad_state === "running" ? "ok" : "bad"; row.append(cell); });
+    $("workers").append(row);
+  }
+  if (!workers.length) { const row = document.createElement("tr"), cell = document.createElement("td"); cell.colSpan = 8; cell.textContent = "Waiting for the recorder to publish its container inventory."; row.append(cell); $("workers").append(row); }
+  $("credits").textContent = data.credit_note || "Provider observations are not available yet.";
+  chart.update({time_ms: at, candles: bars});
+}
+async function refresh() {
+  if (busy) return; busy = true;
+  try {
+    const response = await fetch("/api/proxyrack", {cache: "no-store", signal: AbortSignal.timeout(10000)});
+    if (!response.ok) throw Error("Recorder unavailable");
+    data = await response.json(); failed = false; render();
+  } catch (error) {
+    failed = true;
+    if (data) render();
+    else { $("connection").textContent = "Waiting for the PR recorder"; $("connection").className = "bad"; $("notice").textContent = "PR recorder data is not available yet."; $("notice").classList.remove("hidden"); }
+  } finally { busy = false; }
+}
+$("hours").onchange = () => { chart.hide(); render(); };
+setInterval(refresh, 5000); refresh();
+</script></body></html>

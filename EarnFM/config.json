@@ -1,0 +1,25 @@
+{
+  "organization": "ssh3",
+  "project": "default",
+  "name": "earnfm-us",
+  "display_name": "EF",
+  "replicas": 10,
+  "image": "docker.io/earnfm/earnfm-client@sha256:99a9feaa3dfab9e858012994fa1f922523f41b098e6b1cd9c9e9fca9286c3843",
+  "recorded_cloud_version": 12,
+  "recorded_group_id": "90078bc1-4410-46cd-8411-6ebb8968eec2",
+  "recorded_cooldowns": {
+    "55da989f-fdeb-5a51-b95b-1627b227f1be": 1788821961,
+    "640f0410-7d89-4c51-a507-17cdd7acbac1": 1788821197
+  },
+  "recorded_at_utc": "2026-09-07T17:02:00+00:00",
+  "activity_seconds": 900,
+  "activity_min_bytes": 262144,
+  "country_codes": [
+    "us"
+  ],
+  "recorded_country_codes": [
+    "gb"
+  ],
+  "recorded_cooldowns_at_utc": "2026-09-07T15:58:27.127224+00:00",
+  "activity_min_bytes_note": "Legacy environment compatibility value only; v12 ignores this floor and emits activity_min_bytes:0. Healthy idle clients are retained."
+}

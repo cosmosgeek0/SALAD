@@ -1,0 +1,52 @@
+{
+  "snapshot_time_ms": 1788756842730,
+  "cloud_group_id": "90078bc1-4410-46cd-8411-6ebb8968eec2",
+  "cloud_version": 8,
+  "create_time": "2026-09-06T20:33:32.2242869+00:00",
+  "cloud_update_time": "2026-09-07T02:29:15.9086685+00:00",
+  "original_provider_baseline": {
+    "time_ms": 1788730420050,
+    "balance": 0.041831,
+    "gb": 0.418308
+  },
+  "stale_target_file_reference": {
+    "id": "90078bc1-4410-46cd-8411-6ebb8968eec2",
+    "organization": "ssh3",
+    "project": "default",
+    "group": "earnfm-us",
+    "desired": 10,
+    "image": "docker.io/earnfm/earnfm-client@sha256:99a9feaa3dfab9e858012994fa1f922523f41b098e6b1cd9c9e9fca9286c3843",
+    "created_at": "2026-09-06T20:33:33.192945+00:00",
+    "phase": "measuring",
+    "display_name": "EF",
+    "measurement_started_ms": 1788729704607,
+    "agent_sha256": "64ff95194f8ff6a2d3afdfbddc5b39ec2298d1b70f686e67f5c1ec399146bd86",
+    "version": 6,
+    "cooldowns": {
+      "640f0410-7d89-4c51-a507-17cdd7acbac1": 1788821197,
+      "55da989f-fdeb-5a51-b95b-1627b227f1be": 1788821961
+    },
+    "recovery_started_ms": 1788743729183,
+    "recovery_baseline": {
+      "observed_ms": 1788743674255,
+      "balance": 0.051763,
+      "gb": 0.517626
+    }
+  },
+  "observation": {
+    "running": 10,
+    "provider_confirmed": 10,
+    "paused": 0,
+    "raw_total_mb": 1326.098141,
+    "provider": {
+      "checked_ms": 1788756824057,
+      "observed_ms": 1788756824387,
+      "balance": 0.090613,
+      "gb": 0.906134,
+      "earned": 0.048782,
+      "credited_mb": 487.826,
+      "baseline_ms": 1788730420050,
+      "error": null
+    }
+  }
+}

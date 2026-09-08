@@ -1,0 +1,9 @@
+.runtime/
+.verification/
+__pycache__/
+*.pyc
+backups/
+dashboard/static/earnfm.json
+dashboard/static/earnfm.tmp
+
+.work/

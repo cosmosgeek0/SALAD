@@ -17,10 +17,9 @@ jobs={
  'rfm':('com.cosmosgeek.earnfm-recorder',['-B',str(root/'scripts/earnfm-recorder.py')],'earnfm/recorder'),
  'tm':('com.cosmosgeek.tm-observer',['-B',str(root/'traffmonetizer/observer.py')],'traffmonetizer/observer'),
  'pawns':('com.cosmosgeek.pawns-observer',['-B',str(root/'pawns/observe.py')],'pawns/observer'),
- 'earnapp':('com.cosmosgeek.earnapp-recorder',['-B',str(root/'scripts/earnapp-recorder.py')],'earnapp/recorder'),
  'grass':('com.cosmosgeek.grass-recorder',['-B',str(root/'scripts/grass-recorder.py')],'grass/recorder')}
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('services',nargs='+',choices=jobs);p.add_argument('--write-only',action='store_true');args=p.parse_args()
-env=dict(PYTHONPATH=str(root),PYTHONDONTWRITEBYTECODE='1',HG_FLEET_DIR=str(data/'hg-fleet'),HG_KEYCHAIN_HELPER=str(root/'.runtime/keychain-store'),PS_ORGANIZATION='hyperlane',PS_PROJECT='default',PS_GROUP='ps-test-us',EARNAPP_DATA_DIR=str(data/'earnapp'))
+env=dict(PYTHONPATH=str(root),PYTHONDONTWRITEBYTECODE='1',HG_FLEET_DIR=str(data/'hg-fleet'),HG_KEYCHAIN_HELPER=str(root/'.runtime/keychain-store'),PS_ORGANIZATION='hyperlane',PS_PROJECT='default',PS_GROUP='ps-test-us')
 os.umask(0o077);agents.mkdir(parents=True,exist_ok=True)
 for name in args.services:
  label,arguments,logs=jobs[name]

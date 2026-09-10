@@ -195,7 +195,7 @@ def sample_history(db, path, service, test_start, start_ms, end_ms, cache):
 def history_snapshot(root, query, fleet_view, cache, read_view):
     service = query.get("service", [""])[0]
     folders = {"hg": "fleet-tests", "ps": "packetstream", "proxyrack": "proxyrack", "rp": "repocket",
-               "earnfm": "earnfm", "tm": "traffmonetizer", "pawns": "pawns", "earnapp": "earnapp", "grass": "grass"}
+               "earnfm": "earnfm", "tm": "traffmonetizer", "pawns": "pawns", "grass": "grass"}
     if service not in folders:
         raise ValueError("Unknown history service")
     hours = query.get("hours", ["24"])[0]
@@ -967,7 +967,7 @@ def make_handler(store: Store, status_provider: Callable[[], Dict[str, Any]], st
             query = parse_qs(parsed.query)
             services = {"/api/fleet-test": "hg", "/api/ps1/minutes": "ps", "/api/ps1/view": "ps", "/api/proxyrack": "proxyrack",
                         "/api/repocket": "rp", "/api/earnfm": "earnfm", "/ef.json": "earnfm", "/earnfm.json": "earnfm",
-                        "/api/traffmonetizer": "tm", "/api/pawns": "pawns", "/api/earnapp": "earnapp", "/api/grass": "grass"}
+                        "/api/traffmonetizer": "tm", "/api/pawns": "pawns", "/api/grass": "grass"}
             if status == 200 and parsed.path in services and "minute" not in query and "archive" not in query:
                 hours = int(query.get("hours", ["24"])[0])
                 if hours not in (1, 6, 12, 24, 720):
@@ -1031,7 +1031,7 @@ def make_handler(store: Store, status_provider: Callable[[], Dict[str, Any]], st
                     result = dict(result, rows=[dict(row, cost=lookup.get(row.get("instance"))) for row in result["rows"]])
                     self.send_json(200, result)
                     return
-                if parsed.path in ("/api/pawns", "/api/earnapp", "/api/grass"):
+                if parsed.path in ("/api/pawns", "/api/grass"):
                     service = parsed.path.rsplit("/", 1)[1]
                     name = {"pawns": "Pawns.app", "earnapp": "EarnApp", "grass": "Grass"}[service]
                     path = Path.home() / ".hg1" / service / "view.json"
@@ -1183,7 +1183,7 @@ def make_handler(store: Store, status_provider: Callable[[], Dict[str, Any]], st
                 redirects = {"/overview.html": "/overview", "/rp": "/repocket", "/rp.html": "/repocket",
                              "/repocket.html": "/repocket", "/proxyrack.html": "/proxyrack", "/earnfm.html": "/earnfm",
                              "/tm": "/traffmonetizer", "/tm.html": "/traffmonetizer", "/traffmonetizer.html": "/traffmonetizer",
-                             "/pawns": "/pawns-app", "/pawns.html": "/pawns-app", "/earnapp.html": "/earnapp",
+                             "/pawns": "/pawns-app", "/pawns.html": "/pawns-app",
                              "/grass.html": "/grass", "/ef": "/earnfm/details"}
                 destination = redirects.get(parsed.path)
                 if destination:
@@ -1198,7 +1198,7 @@ def make_handler(store: Store, status_provider: Callable[[], Dict[str, Any]], st
                               "/salad-logo.svg": "salad-logo.svg", "/InterVariable.woff2": "InterVariable.woff2",
                               "/JetBrainsMono-Regular.woff2": "JetBrainsMono-Regular.woff2"})
                 files.update({path: "index.html" for path in ("/honeygain", "/packetstream", "/proxyrack", "/repocket",
-                              "/earnfm", "/traffmonetizer", "/pawns-app", "/earnapp", "/grass")})
+                              "/earnfm", "/traffmonetizer", "/pawns-app", "/grass")})
                 filename = files.get(parsed.path)
                 if filename is None:
                     self.send_json(404, {"error": "not found"})

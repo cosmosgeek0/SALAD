@@ -8,7 +8,7 @@ import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--read", action="store_true")
-parser.add_argument("--service", required=True, choices=("salad-bandwidth-api", "proxyrack-peer-api", "earnfm-read-session", "salad-traffmonetizer-session", "earnapp-read-session", "repocket-provider-session", "packetstream-provider-session"))
+parser.add_argument("--service", required=True, choices=("salad-bandwidth-api", "proxyrack-peer-api", "earnfm-read-session", "salad-traffmonetizer-session", "repocket-provider-session", "packetstream-provider-session"))
 parser.add_argument("--account", required=True)
 args = parser.parse_args()
 os.umask(0o077)

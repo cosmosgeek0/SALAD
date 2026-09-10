@@ -1,5 +1,8 @@
 # bandwidth reel
 
+EarnApp was permanently retired on 10 September 2026 after account suspension. Do not install, deploy, record, or restore it. Historical instructions mentioning it are superseded.
+
+
 Source, focused rebuild guides and safe configuration for the Salad bandwidth project.
 
 The deployed website source was verified and published in [release 1c70638](https://github.com/cosmosgeek0/SALAD/commit/1c70638e8efbe337e27ba1c0c78212f3df365f82). This backup adds the protocol packages and reconstruction guides around that release. Unpublished Honeygain recovery-ledger changes and separate preview worktrees are excluded; they are not presented as deployed behavior.
@@ -15,7 +18,6 @@ The live dashboard is [salad.cosmosgeek.org](https://salad.cosmosgeek.org/). **F
 | EarnFM | [EarnFM/README.md](EarnFM/README.md) |
 | Traffic Monetizer | [TraffMonetizer/README.md](TraffMonetizer/README.md) |
 | Pawns.app | [pawns/README.md](pawns/README.md) |
-| EarnApp | [EarnApp/README.md](EarnApp/README.md) |
 | Grass | [grass/README.md](grass/README.md) |
 | Mysterium | [mysterium/README.md](mysterium/README.md) |
 | Shared website | [Website/README.md](Website/README.md) |

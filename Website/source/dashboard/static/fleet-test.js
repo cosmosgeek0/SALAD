@@ -65,7 +65,6 @@
     {id:'earnfm',path:'/earnfm',hash:'#earnfm',name:'EarnFM',url:'/api/earnfm'},
     {id:'tm',path:'/traffmonetizer',hash:'#tm',name:'TraffMonetizer',url:'/api/traffmonetizer?chart=1'},
     {id:'pawns',path:'/pawns-app',hash:'#pawns',name:'Pawns.app',url:'/api/pawns'},
-    {id:'earnapp',path:'/earnapp',hash:'#earnapp',name:'EarnApp',url:'/api/earnapp'},
     {id:'grass',path:'/grass',hash:'#grass',name:'Grass',url:'/api/grass'}
   ];
   const aliases={'/rp':'rp','/tm':'tm','/pawns':'pawns'};

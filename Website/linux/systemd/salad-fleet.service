@@ -36,7 +36,7 @@ LockPersonality=yes
 SystemCallArchitectures=native
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
 ReadWritePaths=/home/salad/.hg1 /run/salad-credentials
-ReadOnlyPaths=/home/salad/.hg1/hg-fleet /home/salad/.hg1/packetstream /home/salad/.hg1/proxyrack /home/salad/.hg1/repocket /home/salad/.hg1/earnfm /home/salad/.hg1/traffmonetizer /home/salad/.hg1/earnapp /home/salad/.hg1/pawns /home/salad/.hg1/grass /home/salad/.hg1/bandwidth.sqlite3
+ReadOnlyPaths=/home/salad/.hg1/hg-fleet /home/salad/.hg1/packetstream /home/salad/.hg1/proxyrack /home/salad/.hg1/repocket /home/salad/.hg1/earnfm /home/salad/.hg1/traffmonetizer /home/salad/.hg1/pawns /home/salad/.hg1/grass /home/salad/.hg1/bandwidth.sqlite3
 InaccessiblePaths=/etc/cloudflared-salad /run/salad-ui
 
 [Install]
